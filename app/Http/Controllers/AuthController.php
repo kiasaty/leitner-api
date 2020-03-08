@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\User;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
+use App\Http\Resources\UserResource;
 
 class AuthController extends Controller
 {
@@ -24,18 +25,8 @@ class AuthController extends Controller
 
         $jwt = $this->generateJWT($user);
 
-        return response()->json([
-            'token'     => $jwt,
-            'user'      => [
-                'id'            => $user->id,
-                'firstname'     => $user->firstname,
-                'lastname'      => $user->lastname,
-                'fullname'      => $user->firstname . ' ' . $user->lastname,
-                'username'      => $user->username,
-                'email'         => $user->email,
-                'profile_photo' => $user->profile_photo,
-            ]
-        ]);
+        return (new UserResource($user))
+            ->additional(['token' => $jwt ]);
     }
 
     /**
