@@ -18,7 +18,11 @@ use Faker\Generator as Faker;
 
 $factory->define(User::class, function (Faker $faker) {
     return [
-        'name' => $faker->name,
-        'email' => $faker->email,
+        'firstname'     => $faker->firstName,
+        'lastname'      => $faker->lastName,
+        'username'      => $faker->userName,
+        'email'         => $faker->email,
+        'password'      => app('hash')->make('secret'),
+        // 'profile_photo' => $faker->image,
     ];
 });
