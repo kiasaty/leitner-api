@@ -17,16 +17,33 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      *
      * @var array
      */
-    protected $fillable = [
-        'name', 'email',
-    ];
+    protected $guarded = [];
+    
+    /**
+    * Get the user's full name.
+    *
+    * @return string
+    */
+    public function getFullnameAttribute()
+    {
+        return "{$this->firstname} {$this->lastname}";
+    }
 
     /**
-     * The attributes excluded from the model's JSON form.
+     * Check if the user is admin
      *
-     * @var array
+     * @return bool
      */
-    protected $hidden = [
-        'password',
-    ];
+    public function isAdmin()
+    {
+        return $this->id === 1;
+    }
+
+    /**
+     * Get the user's boxes.
+     */
+    public function boxes()
+    {
+        return $this->hasMany('App\Box', 'creator_id');
+    }
 }
