@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Box;
 use Illuminate\Http\Request;
-use App\Http\Resources\BoxResource;
+use App\Http\Resources\CardResource;
 
-class BoxController extends Controller
+class CardController extends Controller
 {
     public function __construct()
     {
@@ -14,81 +14,88 @@ class BoxController extends Controller
     }
 
     /**
-     * Get all boxes
+     * Get all cards
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($boxID)
     {
-        $boxes = Box::all();
+        $box = Box::findOrFail($boxID);
         
-        return BoxResource::collection($boxes)
+        return CardResource::collection($box->cards)
             ->additional(['success' => true ]);
     }
 
     /**
-     * Create a box
+     * Create a card
      * 
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $boxID)
     {
+        $box = Box::findOrFail($boxID);
+
         $validatedInput = $this->validateInput($request);
 
-        $box = $request->user()->boxes()->create($validatedInput);
+        $card = $box->cards()->create($validatedInput);
 
-        return new BoxResource($box);
+        return new CardResource($card);
     }
 
     /**
-     * Get a box
+     * Get a card
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, $boxID)
     {
-        $box = Box::findOrFail($id);
+        $box = Box::findOrFail($boxID);
 
-        return new BoxResource($box);
+        $card = $box->cards()->findOrFail($id);
+
+        return new CardResource($card);
     }
 
     /**
-     * Edit a box.
+     * Edit a card.
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, $boxID)
     {
-        $box = $request->user()->boxes()->findOrFail($id);
+        $box = Box::findOrFail($boxID);
+
+        $card = $box->cards()->findOrFail($id);
 
         $validatedInput = $this->validateInput($request);
 
-        $box->update($validatedInput);
+        $card->update($validatedInput);
 
-        return new BoxResource($box);
+        return new CardResource($card);
     }
 
     /**
-     * Delete a box
+     * Delete a card
      *
      * @param int $id
-     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy($id, $boxID)
     {
-        $box = $request->user()->boxes()->findOrFail($id);
+        $box = Box::findOrFail($boxID);
 
-        $box->delete();
+        $card = $box->cards()->findOrFail($id);
+
+        $card->delete();
     }
 
     /**
-     * Validates box's input
+     * Validates card's input
      * 
      * @param  \Illuminate\Http\Request  $request
      * @return Array  validated input
@@ -96,8 +103,8 @@ class BoxController extends Controller
     private function validateInput($request)
     {
         $rules = [
-            'title'         => ['required', 'string',' min:2', 'max:250'],
-            'description'   => ['required', 'string', 'min:3', 'max:1000']
+            'front' => ['required', 'string',' min:2', 'max:250'],
+            'back'  => ['required', 'string', 'min:3', 'max:1000']
         ];
 
         if ($request->isMethod('put')) {
