@@ -16,10 +16,10 @@ class CreateCardsTable extends Migration
         Schema::create('cards', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('box_id');
-            $table->unsignedSmallInteger('deck_id')->nullable();
             $table->string('front', 250);
             $table->string('back', 1000);
             $table->unsignedTinyInteger('level');
+            $table->unsignedSmallInteger('deck_id')->nullable();
             $table->timestamps();
 
             $table->foreign('box_id')->references('id')->on('boxes')->onDelete('cascade');
