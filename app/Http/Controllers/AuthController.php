@@ -64,9 +64,7 @@ class AuthController extends Controller
      */
     private function checkIfCredentialsAreCorrect($user, $credentials)
     {
-        $isPasswordCorrect = app('hash')->check($credentials['password'], $user->password);
-
-        if (is_null($user) || !$isPasswordCorrect) {
+        if (is_null($user) || !app('hash')->check($credentials['password'], $user->password)) {
             abort(422, 'Wrong Credentials!');
         }
     }
