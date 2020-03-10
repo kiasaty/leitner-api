@@ -14,9 +14,9 @@ class Box extends Model
     protected $guarded = [];
 
     /**
-     * Get the owner of this box.
+     * Get the creator of this box.
      */
-    public function owner()
+    public function creator()
     {
         return $this->belongsTo('App\User', 'creator_id');
     }
