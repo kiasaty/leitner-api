@@ -14,8 +14,10 @@ class CreateBoxesTable extends Migration
     public function up()
     {
         Schema::create('boxes', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('creator_id');
+            $table->increments('id');
+            $table->unsignedInteger('creator_id');
+            $table->string('title');
+            $table->string('description')->nullable();
             $table->timestamps();
 
             $table->foreign('creator_id')->references('id')->on('users')->onDelete('cascade');

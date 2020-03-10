@@ -7,6 +7,7 @@ use Faker\Generator as Faker;
 
 $factory->define(Box::class, function (Faker $faker) {
     return [
-        //
+        'title'         => $faker->word,
+        'description'   => $faker->sentence,
     ];
 });

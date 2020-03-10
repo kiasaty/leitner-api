@@ -14,12 +14,12 @@ class CreateCardsTable extends Migration
     public function up()
     {
         Schema::create('cards', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->unsignedBigInteger('box_id');
+            $table->increments('id');
+            $table->unsignedInteger('box_id');
+            $table->unsignedSmallInteger('deck_id')->nullable();
             $table->string('front', 250);
             $table->string('back', 1000);
             $table->unsignedTinyInteger('level');
-            $table->timestamp('archived_at')->nullable();
             $table->timestamps();
 
             $table->foreign('box_id')->references('id')->on('boxes')->onDelete('cascade');
