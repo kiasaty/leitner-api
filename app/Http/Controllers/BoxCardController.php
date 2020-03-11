@@ -6,7 +6,7 @@ use App\Box;
 use Illuminate\Http\Request;
 use App\Http\Resources\CardResource;
 
-class CardController extends Controller
+class BoxCardController extends Controller
 {
     public function __construct()
     {
@@ -16,7 +16,7 @@ class CardController extends Controller
     /**
      * Get all cards
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
     public function index($boxID)
@@ -31,6 +31,7 @@ class CardController extends Controller
      * Create a card
      * 
      * @param  \Illuminate\Http\Request  $request
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
     public function store(Request $request, $boxID)
@@ -47,14 +48,15 @@ class CardController extends Controller
     /**
      * Get a card
      *
-     * @param  int  $id
+     * @param  int  $boxID
+     * @param  int  $cardID
      * @return \Illuminate\Http\Response
      */
-    public function show($id, $boxID)
+    public function show($boxID, $cardID)
     {
         $box = Box::findOrFail($boxID);
 
-        $card = $box->cards()->findOrFail($id);
+        $card = $box->cards()->findOrFail($cardID);
 
         return new CardResource($card);
     }
@@ -63,14 +65,15 @@ class CardController extends Controller
      * Edit a card.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int $id
+     * @param  int  $boxID
+     * @param  int  $cardID
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id, $boxID)
+    public function update(Request $request, $boxID, $cardID)
     {
         $box = Box::findOrFail($boxID);
 
-        $card = $box->cards()->findOrFail($id);
+        $card = $box->cards()->findOrFail($cardID);
 
         $validatedInput = $this->validateInput($request);
 
@@ -82,14 +85,15 @@ class CardController extends Controller
     /**
      * Delete a card
      *
-     * @param int $id
+     * @param  int  $boxID
+     * @param  int  $cardID
      * @return \Illuminate\Http\Response
      */
-    public function destroy($id, $boxID)
+    public function destroy($boxID, $cardID)
     {
         $box = Box::findOrFail($boxID);
 
-        $card = $box->cards()->findOrFail($id);
+        $card = $box->cards()->findOrFail($cardID);
 
         $card->delete();
     }

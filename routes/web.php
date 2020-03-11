@@ -39,9 +39,9 @@ $router->group(['prefix' => 'users/{user_id}/boxes'], function () use ($router) 
 });
 
 $router->group(['prefix' => 'boxes/{box_id}/cards'], function () use ($router) {
-    $router->get('/', 'CardController@index');
-    $router->post('/', 'CardController@store');
-    $router->get('/{id}', 'CardController@show');
-    $router->put('/{id}', 'CardController@update');
-    $router->delete('/{id}', 'CardController@destroy');
+    $router->get('/', 'BoxCardController@index');
+    $router->post('/', 'BoxCardController@store');
+    $router->get('/{id}', 'BoxCardController@show');
+    $router->put('/{id}', 'BoxCardController@update');
+    $router->delete('/{id}', 'BoxCardController@destroy');
 });
