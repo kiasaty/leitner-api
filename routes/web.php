@@ -25,6 +25,11 @@ $router->group(['prefix' => 'users'], function () use ($router) {
     $router->delete('/{id}', 'UserController@destroy');
 });
 
+$router->group(['prefix' => 'boxes'], function () use ($router) {
+    $router->get('/', 'BoxController@index');
+    $router->get('/{id}', 'BoxController@show');
+});
+
 $router->group(['prefix' => 'users/{user_id}/boxes'], function () use ($router) {
     $router->get('/', 'UserBoxController@index');
     $router->post('/', 'UserBoxController@store');
