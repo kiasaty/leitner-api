@@ -13,8 +13,10 @@ class DatabaseSeeder extends Seeder
     {
         factory(App\User::class, 5)->create()->each(function ($user) {
 
-            $user->boxes()->saveMany(
+            $user->createdBoxes()->saveMany(
                 factory(App\Box::class, 2)->create(['creator_id' => $user->id])->each(function ($box) {
+
+                    $box->creator->boxes()->attach($box->id);
 
                     $box->cards()->saveMany(
                         factory(App\Card::class, 10)->make()

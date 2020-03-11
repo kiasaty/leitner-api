@@ -37,7 +37,7 @@ class BoxController extends Controller
     {
         $validatedInput = $this->validateInput($request);
 
-        $box = $request->user()->boxes()->create($validatedInput);
+        $box = $request->user()->createdBoxes()->create($validatedInput);
 
         return new BoxResource($box);
     }
@@ -64,7 +64,7 @@ class BoxController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $box = $request->user()->boxes()->findOrFail($id);
+        $box = $request->user()->createdBoxes()->findOrFail($id);
 
         $validatedInput = $this->validateInput($request);
 
@@ -82,7 +82,7 @@ class BoxController extends Controller
      */
     public function destroy(Request $request, $id)
     {
-        $box = $request->user()->boxes()->findOrFail($id);
+        $box = $request->user()->createdBoxes()->findOrFail($id);
 
         $box->delete();
     }

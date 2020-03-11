@@ -22,6 +22,17 @@ class Box extends Model
     }
 
     /**
+     * The users that are using the box.
+     */
+    public function users()
+    {
+        return $this->belongsToMany('App\User')
+            ->as('subscription')
+            ->withPivot('session')
+            ->withTimestamps();;
+    }
+
+    /**
      * Get the cards of this box.
      */
     public function cards()

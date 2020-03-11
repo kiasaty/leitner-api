@@ -40,10 +40,21 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     /**
-     * Get the user's boxes.
+     * The boxes that the user has created.
+     */
+    public function createdBoxes()
+    {
+        return $this->hasMany('App\Box', 'creator_id');
+    }
+
+    /**
+     * The boxes that the user is learning.
      */
     public function boxes()
     {
-        return $this->hasMany('App\Box', 'creator_id');
+        return $this->belongsToMany('App\Box')
+            ->as('subscription')
+            ->withPivot('session')
+            ->withTimestamps();
     }
 }
