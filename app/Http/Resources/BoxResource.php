@@ -24,12 +24,17 @@ class BoxResource extends JsonResource
     public function toArray($request)
     {
         return [
+            'type'          => 'box',
+
+            // Attributes
             'id'            => $this->id,
             'title'         => $this->title,
             'description'   => $this->description,
-            'creator'       => new UserResource($this->creator),
             'created_at'    => date_format($this->created_at, 'Y-m-d H:m:s'),
             'updated_at'    => date_format($this->updated_at, 'Y-m-d H:m:s'),
+            
+            // Relationships
+            'creator'       => new UserResource($this->creator),
         ];
     }
 }
