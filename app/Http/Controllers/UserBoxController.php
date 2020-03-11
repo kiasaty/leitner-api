@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers;
 
-use App\Box;
+use App\User;
 use Illuminate\Http\Request;
 use App\Http\Resources\BoxResource;
 
-class BoxController extends Controller
+class UserBoxController extends Controller
 {
     public function __construct()
     {
@@ -16,12 +16,14 @@ class BoxController extends Controller
     /**
      * Get all boxes
      *
-     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $userID
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index($userID)
     {
-        $boxes = Box::all();
+        $user = User::findOrFail($userID);
+
+        $boxes = $user->createdBoxes;
         
         return BoxResource::collection($boxes)
             ->additional(['success' => true ]);
@@ -30,14 +32,17 @@ class BoxController extends Controller
     /**
      * Create a box
      * 
+     * @param  int  $userID
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, $userID)
     {
         $validatedInput = $this->validateInput($request);
 
-        $box = $request->user()->createdBoxes()->create($validatedInput);
+        $user = User::findOrFail($userID);
+
+        $box = $user->createdBoxes()->create($validatedInput);
 
         return new BoxResource($box);
     }
@@ -45,12 +50,15 @@ class BoxController extends Controller
     /**
      * Get a box
      *
-     * @param  int  $id
+     * @param  int  $userID
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($userID, $boxID)
     {
-        $box = Box::findOrFail($id);
+        $user = User::findOrFail($userID);
+
+        $box = $user->createdBoxes()->findOrFail($boxID);
 
         return new BoxResource($box);
     }
@@ -59,12 +67,15 @@ class BoxController extends Controller
      * Edit a box.
      *
      * @param  \Illuminate\Http\Request  $request
-     * @param  int $id
+     * @param  int  $userID
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $userID, $boxID)
     {
-        $box = $request->user()->createdBoxes()->findOrFail($id);
+        $user = User::findOrFail($userID);
+
+        $box = $user->createdBoxes()->findOrFail($boxID);
 
         $validatedInput = $this->validateInput($request);
 
@@ -76,13 +87,15 @@ class BoxController extends Controller
     /**
      * Delete a box
      *
-     * @param int $id
-     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $userID
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Request $request, $id)
+    public function destroy($userID, $boxID)
     {
-        $box = $request->user()->createdBoxes()->findOrFail($id);
+        $user = User::findOrFail($userID);
+
+        $box = $user->createdBoxes()->findOrFail($boxID);
 
         $box->delete();
     }

@@ -25,12 +25,12 @@ $router->group(['prefix' => 'users'], function () use ($router) {
     $router->delete('/{id}', 'UserController@destroy');
 });
 
-$router->group(['prefix' => 'boxes'], function () use ($router) {
-    $router->get('/', 'BoxController@index');
-    $router->post('/', 'BoxController@store');
-    $router->get('/{id}', 'BoxController@show');
-    $router->put('/{id}', 'BoxController@update');
-    $router->delete('/{id}', 'BoxController@destroy');
+$router->group(['prefix' => 'users/{user_id}/boxes'], function () use ($router) {
+    $router->get('/', 'UserBoxController@index');
+    $router->post('/', 'UserBoxController@store');
+    $router->get('/{id}', 'UserBoxController@show');
+    $router->put('/{id}', 'UserBoxController@update');
+    $router->delete('/{id}', 'UserBoxController@destroy');
 });
 
 $router->group(['prefix' => 'boxes/{box_id}/cards'], function () use ($router) {
