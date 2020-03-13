@@ -29,7 +29,7 @@ class Box extends Model
         return $this->belongsToMany('App\User')
             ->as('subscription')
             ->withPivot('session')
-            ->withTimestamps();;
+            ->withTimestamps();
     }
 
     /**
