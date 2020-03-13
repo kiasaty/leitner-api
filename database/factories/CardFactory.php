@@ -9,6 +9,5 @@ $factory->define(Card::class, function (Faker $faker) {
     return [
         'front' => $faker->word,
         'back'  => $faker->sentence,
-        'level' => $faker->numberBetween(1, 5),
     ];
 });

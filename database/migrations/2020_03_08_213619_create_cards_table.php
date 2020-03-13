@@ -18,8 +18,6 @@ class CreateCardsTable extends Migration
             $table->unsignedInteger('box_id');
             $table->string('front', 250);
             $table->string('back', 1000);
-            $table->unsignedTinyInteger('level')->default(1);
-            $table->unsignedSmallInteger('deck_id')->nullable();
             $table->timestamps();
 
             $table->foreign('box_id')->references('id')->on('boxes')->onDelete('cascade');

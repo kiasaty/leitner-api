@@ -30,8 +30,8 @@ class CardResource extends JsonResource
             'id'            => $this->id,
             'front'         => $this->front,
             'back'          => $this->back,
-            'level'         => $this->level,
-            'deck_id'       => $this->deck_id,
+            'level'         => $this->progress->level,
+            'deck_id'       => $this->progress->deck_id,
             'created_at'    => date_format($this->created_at, 'Y-m-d H:m:s'),
             'updated_at'    => date_format($this->updated_at, 'Y-m-d H:m:s'),
             
