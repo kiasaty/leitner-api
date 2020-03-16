@@ -45,3 +45,9 @@ $router->group(['prefix' => 'boxes/{box_id}/cards'], function () use ($router) {
     $router->put('/{id}', 'BoxCardController@update');
     $router->delete('/{id}', 'BoxCardController@destroy');
 });
+
+$router->group(['prefix' => 'session'], function () use ($router) {
+    $router->get('/start', 'SessionController@start');
+    $router->get('/next', 'SessionController@next');
+    $router->get('/process', 'SessionController@process');
+});
