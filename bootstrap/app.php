@@ -6,6 +6,8 @@ require_once __DIR__.'/../vendor/autoload.php';
     dirname(__DIR__)
 ))->bootstrap();
 
+date_default_timezone_set(env('APP_TIMEZONE', 'UTC'));
+
 /*
 |--------------------------------------------------------------------------
 | Create The Application
@@ -52,7 +54,7 @@ $app->singleton(
 |--------------------------------------------------------------------------
 |
 | Now we will register the "app" configuration file. If the file exists in
-| your configuration driectory it will be loaded; otherwise, we'll load
+| your configuration directory it will be loaded; otherwise, we'll load
 | the default version. You may register other files below as needed.
 |
 */
