@@ -49,6 +49,30 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Throwable $exception)
     {
-        return parent::render($request, $exception);
+        $responseCode = parent::render($request, $exception)->getStatusCode();
+
+        $responseBody = [
+            'success' => false,
+            'errors' => [
+                'status' => $responseCode,
+                'source' => [
+                    'pointer' => $request->path()
+                ]
+            ]
+        ];
+        
+        if ($exception instanceof ValidationException) {
+            $responseBody['errors']['detail'] = $exception->errors();
+        } elseif ($responseCode == 422) {
+            $responseBody['errors']['detail'] = $exception->getMessage();
+        } elseif ($responseCode == 404) {
+            $responseBody['errors']['detail'] = 'Not Found!';
+        } elseif ($responseCode == 401 || $responseCode == 403) {
+            $responseBody['errors']['detail'] = 'Unauthorized!';
+        } else {
+            $responseBody['errors']['detail'] = 'Internal Error!';
+        }
+        
+        return response()->json($responseBody, $responseCode);
     }
 }
