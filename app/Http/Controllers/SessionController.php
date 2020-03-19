@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use App\Services\SessionService;
+use App\Http\Resources\CardResource;
 
 class SessionController extends Controller
 {
@@ -51,7 +52,7 @@ class SessionController extends Controller
 
         $card = (new SessionService($box))->getNextCard();
         
-        return response()->json($card);
+        return new CardResource($card);
     }
 
     /**

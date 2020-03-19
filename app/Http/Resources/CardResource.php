@@ -23,6 +23,7 @@ class CardResource extends JsonResource
      */
     public function toArray($request)
     {
+        $test = 'test';
         return [
             'type'          => 'card',
 
@@ -30,13 +31,18 @@ class CardResource extends JsonResource
             'id'            => $this->id,
             'front'         => $this->front,
             'back'          => $this->back,
-            'level'         => $this->progress->level,
-            'deck_id'       => $this->progress->deck_id,
             'created_at'    => date_format($this->created_at, 'Y-m-d H:m:s'),
             'updated_at'    => date_format($this->updated_at, 'Y-m-d H:m:s'),
+
+            'level'     => $this->whenPivotLoadedAs('progress', 'card_user', function () {
+                return $this->progress->level;
+            }),
+            'deck_id'   => $this->whenPivotLoadedAs('progress', 'card_user', function () {
+                return $this->progress->deck_id;
+            }),
             
             // Relationships
-            'box'           => new BoxResource($this->box),
+            'box'   => new BoxResource($this->box),
         ];
     }
 }
