@@ -50,18 +50,8 @@ class SessionService
         if (! $this->areAllCardsInSessionProcessed()) {
             abort(422, 'The current session is not completed!');
         } 
-        
-        $now = \Carbon\Carbon::now();
-        $latestProcessedCardTime = $this->getLatestProcessedCard()->progress->updated_at;
-        $diffInMin = $latestProcessedCardTime->diffInMinutes($now);
-        if ($diffInMin < 10 * 60) {
-            $hours = 10 - floor($diffInMin / 60);
-            $minutes = 60 - $diffInMin % 60;
-            $timeLeft = $hours ? "$hours hours" : '';
-            $timeLeft .= $hours && $minutes ? " and " : '';
-            $timeLeft .= $minutes ? "$minutes minutes" : '';
-            abort(422, "Next session can be started after $timeLeft.");
-        }
+
+        $this->checkIfBreakTimeIsOver();
 
         $session = $this->session < 9 ? $this->session + 1 : 0;
 
@@ -192,5 +182,34 @@ class SessionService
             ->where('box_id', $this->box->id)
             ->latest('pivot_updated_at')
             ->first();
+    }
+
+    /**
+     * @todo this should be refactored.
+     */
+    private function checkIfBreakTimeIsOver()
+    {
+        $gapTime = config('session.gap_time');
+
+        if ($gapTime <= 0) {
+            return;
+        }
+
+        $now = \Carbon\Carbon::now();
+        $latestProcessedCardTime = $this->getLatestProcessedCard()->progress->updated_at;
+        $diffInMin = $latestProcessedCardTime->diffInMinutes($now);
+
+        if ($diffInMin > $gapTime * 60) {
+            return;
+        }
+
+        $hours = $gapTime - floor($diffInMin / 60);
+        $minutes = 60 - $diffInMin % 60;
+
+        $timeLeft = $hours ? "$hours hours" : '';
+        $timeLeft .= $hours && $minutes ? " and " : '';
+        $timeLeft .= $minutes ? "$minutes minutes" : '';
+
+        abort(422, "Next session can be started after $timeLeft.");
     }
 }
