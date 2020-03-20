@@ -2,6 +2,8 @@
 
 namespace App\Services;
 
+use Carbon\Carbon;
+
 class SessionService
 {
     /**
@@ -25,6 +27,11 @@ class SessionService
     private $session;
 
     /**
+     * @var \DateTime
+     */
+    private $sessionStartedAt;
+
+    /**
      * @param \App\Box $box
      * @return void
      */
@@ -37,6 +44,8 @@ class SessionService
         $this->box = $box;
 
         $this->session = $this->box->subscription->session;
+
+        $this->sessionStartedAt = $this->box->subscription->session_started_at;
     }
 
     /**
@@ -53,12 +62,14 @@ class SessionService
 
         $this->checkIfBreakTimeIsOver();
 
-        $session = $this->session < 9 ? $this->session + 1 : 0;
+        $session = is_null($this->sessionStartedAt) || $this->session == 9 ?
+            0 : 
+            $this->session + 1;
 
-        return $this->box->users()->updateExistingPivot(
-            $this->user->id,
-            ['session' => $session]
-        );
+        return $this->box->users()->updateExistingPivot($this->user->id, [
+            'session'               => $session, 
+            'session_started_at'    => Carbon::now()
+        ]);
     }
 
     /**
@@ -74,7 +85,11 @@ class SessionService
 
         return $this->user->cards()
             ->where('box_id', $this->box->id)
-            ->wherePivot('updated_at', '<', $this->box->subscription->updated_at)
+            ->wherePivot('updated_at', '<', $this->sessionStartedAt)
+            ->where(function ($query) {
+                $query->whereNull('deck_id')
+                      ->orWhere('deck_id', 'like', "%{$this->session}%");
+            })
             ->orderBy('level')
             ->orderBy('card_id')
             ->first();
@@ -88,7 +103,7 @@ class SessionService
      */
     public function processCard($card)
     {
-        if ($card->progress->updated_at > $this->box->subscription->updated_at) {
+        if ($card->progress->updated_at > $this->sessionStartedAt) {
             abort(422, 'This card has been reviewed before!');
         }
 
@@ -106,9 +121,17 @@ class SessionService
      */
     public function areAllCardsInSessionProcessed()
     {
+        if (is_null($this->sessionStartedAt)) {
+            return true;
+        }
+
         $count = $this->user->cards()
             ->where('box_id', $this->box->id)
-            ->wherePivot('updated_at', '<', $this->box->subscription->updated_at)
+            ->wherePivot('updated_at', '<', $this->sessionStartedAt)
+            ->where(function ($query) {
+                $query->whereNull('deck_id')
+                      ->orWhere('deck_id', 'like', "%{$this->session}%");
+            })
             ->count();
 
         return $count === 0;
@@ -195,9 +218,8 @@ class SessionService
             return;
         }
 
-        $now = \Carbon\Carbon::now();
         $latestProcessedCardTime = $this->getLatestProcessedCard()->progress->updated_at;
-        $diffInMin = $latestProcessedCardTime->diffInMinutes($now);
+        $diffInMin = $latestProcessedCardTime->diffInMinutes(Carbon::now());
 
         if ($diffInMin > $gapTime * 60) {
             return;

@@ -17,7 +17,7 @@ class CreateBoxUserTable extends Migration
             $table->unsignedInteger('box_id');
             $table->unsignedInteger('user_id');
             $table->unsignedTinyInteger('session')->default(0);
-            $table->timestamps();
+            $table->dateTime('session_started_at')->nullable();
 
             $table->primary(['box_id', 'user_id']);
 

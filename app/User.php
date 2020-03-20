@@ -54,8 +54,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->belongsToMany('App\Box')
             ->as('subscription')
-            ->withPivot('session')
-            ->withTimestamps();
+            ->withPivot(['session', 'session_started_at']);
     }
 
     /**
