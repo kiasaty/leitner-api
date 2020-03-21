@@ -265,14 +265,14 @@ class SessionService
             return;
         }
 
-        $latestProcessedCardTime = $this->getLatestProcessedCard()->progress->reviewed_at;
+        $latestProcessedCardTime = new Carbon($this->getLatestProcessedCard()->progress->reviewed_at);
         $diffInMin = $latestProcessedCardTime->diffInMinutes(Carbon::now());
 
         if ($diffInMin > $gapTime * 60) {
             return;
         }
 
-        $hours = $gapTime - floor($diffInMin / 60);
+        $hours = $gapTime - ceil($diffInMin / 60);
         $minutes = 60 - $diffInMin % 60;
 
         $timeLeft = $hours ? "$hours hours" : '';
