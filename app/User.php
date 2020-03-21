@@ -64,8 +64,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         return $this->belongsToMany('App\Card')
             ->as('progress')
-            ->withPivot('level')
-            ->withPivot('deck_id')
-            ->withTimestamps();
+            ->withPivot(['level', 'deck_id', 'reviewed_at']);
     }
 }

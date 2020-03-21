@@ -28,8 +28,6 @@ class Card extends Model
     {
         return $this->belongsToMany('App\User')
             ->as('progress')
-            ->withPivot('level')
-            ->withPivot('deck_id')
-            ->withTimestamps();
+            ->withPivot(['level', 'deck_id', 'reviewed_at']);
     }
 }

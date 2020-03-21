@@ -123,10 +123,13 @@ class SessionService
 
         return $this->user->cards()
             ->where('box_id', $this->box->id)
-            ->wherePivot('updated_at', '<', $this->sessionStartedAt)
             ->where(function ($query) {
                 $query->whereNull('deck_id')
                       ->orWhere('deck_id', 'like', "%{$this->session}%");
+            })
+            ->where(function ($query) {
+                $query->whereNull('reviewed_at')
+                      ->orWhere('reviewed_at', '<', $this->sessionStartedAt);
             })
             ->orderBy('level')
             ->orderBy('card_id')
@@ -141,7 +144,7 @@ class SessionService
      */
     public function processCard($card)
     {
-        if ($card->progress->updated_at > $this->sessionStartedAt) {
+        if ($card->progress->reviewed_at > $this->sessionStartedAt) {
             abort(422, 'This card has been reviewed before!');
         }
 
@@ -165,10 +168,13 @@ class SessionService
 
         $count = $this->user->cards()
             ->where('box_id', $this->box->id)
-            ->wherePivot('updated_at', '<', $this->sessionStartedAt)
             ->where(function ($query) {
                 $query->whereNull('deck_id')
                       ->orWhere('deck_id', 'like', "%{$this->session}%");
+            })
+            ->where(function ($query) {
+                $query->whereNull('reviewed_at')
+                      ->orWhere('reviewed_at', '<', $this->sessionStartedAt);
             })
             ->count();
 
@@ -195,6 +201,8 @@ class SessionService
             $data['deck_id'] = $this->getDeck();
         }
 
+        $data['reviewed_at'] = Carbon::now();
+
         return $this->user->cards()->updateExistingPivot(
             $card->id,
             $data
@@ -210,8 +218,9 @@ class SessionService
     private function moveCardBackwards($card)
     {
         $data = [
-            'level'     => 1,
-            'deck_id'   => null
+            'level'         => 1,
+            'deck_id'       => null,
+            'reviewed_at'   => Carbon::now()
         ];
 
         return $this->user->cards()->updateExistingPivot(
@@ -241,7 +250,7 @@ class SessionService
     {
         return $this->user->cards()
             ->where('box_id', $this->box->id)
-            ->latest('pivot_updated_at')
+            ->latest('reviewed_at')
             ->first();
     }
 
@@ -256,7 +265,7 @@ class SessionService
             return;
         }
 
-        $latestProcessedCardTime = $this->getLatestProcessedCard()->progress->updated_at;
+        $latestProcessedCardTime = $this->getLatestProcessedCard()->progress->reviewed_at;
         $diffInMin = $latestProcessedCardTime->diffInMinutes(Carbon::now());
 
         if ($diffInMin > $gapTime * 60) {
