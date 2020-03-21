@@ -62,6 +62,44 @@ class SessionService
 
         $this->checkIfBreakTimeIsOver();
 
+        $this->attachCards();
+
+        $this->setSession();
+    }
+
+    /**
+     * 
+     */
+    private function attachCards()
+    {
+        $maxNewCards = $this->getMaxNewCards();
+
+        $processingCardsIDs = $this->user->cards()
+            ->where('box_id', $this->box->id)
+            ->pluck('id');
+            
+        $cardsIDs = $this->box->cards()
+            ->whereNotIn('id', $processingCardsIDs)
+            ->take($maxNewCards)
+            ->pluck('id');
+
+        return $this->user->cards()->attach($cardsIDs);
+    }
+
+    /**
+     * @todo an abilicty for the user to select the maxNewCards for each box.
+     *          which overrides the default maxNewCards number.
+     */
+    private function getMaxNewCards()
+    {
+        return config('session.default_max_new_cards');
+    }
+
+    /**
+     * 
+     */
+    private function setSession()
+    {
         $session = is_null($this->sessionStartedAt) || $this->session == 9 ?
             0 : 
             $this->session + 1;
@@ -183,7 +221,7 @@ class SessionService
     }
 
     /**
-     * Get the deck id corresponding to the current session.
+     * Get the deck id corresponding to t45he current session.
      * 
      * @return string
      */

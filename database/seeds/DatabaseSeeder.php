@@ -19,9 +19,7 @@ class DatabaseSeeder extends Seeder
                     $box->creator->boxes()->attach($box->id);
 
                     $box->cards()->saveMany(
-                        factory(App\Card::class, 10)->create(['box_id' => $box->id])->each(function ($card) {
-                            $card->users()->attach($card->box->creator->id);
-                        })
+                        factory(App\Card::class, 10)->make()
                     );
                     
                 })
