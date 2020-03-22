@@ -17,7 +17,7 @@ class CreateCardUserTable extends Migration
             $table->unsignedInteger('user_id');
             $table->unsignedInteger('card_id');
             $table->unsignedTinyInteger('level')->default(1);
-            $table->string('deck_id', 4)->nullable();
+            $table->string('deck', 4)->nullable();
             $table->timestamp('reviewed_at')->nullable();
 
             $table->primary(['card_id', 'user_id']);

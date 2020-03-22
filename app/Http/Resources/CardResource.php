@@ -37,8 +37,8 @@ class CardResource extends JsonResource
             'level'     => $this->whenPivotLoadedAs('progress', 'card_user', function () {
                 return $this->progress->level;
             }),
-            'deck_id'   => $this->whenPivotLoadedAs('progress', 'card_user', function () {
-                return $this->progress->deck_id;
+            'deck'   => $this->whenPivotLoadedAs('progress', 'card_user', function () {
+                return $this->progress->deck;
             }),
             
             // Relationships

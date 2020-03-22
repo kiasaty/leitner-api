@@ -124,8 +124,8 @@ class SessionService
         return $this->user->cards()
             ->where('box_id', $this->box->id)
             ->where(function ($query) {
-                $query->whereNull('deck_id')
-                      ->orWhere('deck_id', 'like', "%{$this->session}%");
+                $query->whereNull('deck')
+                      ->orWhere('deck', 'like', "%{$this->session}%");
             })
             ->where(function ($query) {
                 $query->whereNull('reviewed_at')
@@ -169,8 +169,8 @@ class SessionService
         $count = $this->user->cards()
             ->where('box_id', $this->box->id)
             ->where(function ($query) {
-                $query->whereNull('deck_id')
-                      ->orWhere('deck_id', 'like', "%{$this->session}%");
+                $query->whereNull('deck')
+                      ->orWhere('deck', 'like', "%{$this->session}%");
             })
             ->where(function ($query) {
                 $query->whereNull('reviewed_at')
@@ -198,7 +198,7 @@ class SessionService
         }
 
         if ($level === 1) {
-            $data['deck_id'] = $this->getDeck();
+            $data['deck'] = $this->getDeck();
         }
 
         $data['reviewed_at'] = Carbon::now();
@@ -219,7 +219,7 @@ class SessionService
     {
         $data = [
             'level'         => 1,
-            'deck_id'       => null,
+            'deck'          => null,
             'reviewed_at'   => Carbon::now()
         ];
 
