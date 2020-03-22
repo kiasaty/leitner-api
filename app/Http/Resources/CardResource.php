@@ -34,11 +34,14 @@ class CardResource extends JsonResource
             'created_at'    => date_format($this->created_at, 'Y-m-d H:m:s'),
             'updated_at'    => date_format($this->updated_at, 'Y-m-d H:m:s'),
 
-            'level'     => $this->whenPivotLoadedAs('progress', 'card_user', function () {
+            'level'         => $this->whenPivotLoadedAs('progress', 'card_user', function () {
                 return $this->progress->level;
             }),
-            'deck'   => $this->whenPivotLoadedAs('progress', 'card_user', function () {
+            'deck'          => $this->whenPivotLoadedAs('progress', 'card_user', function () {
                 return $this->progress->deck;
+            }),
+            'reviewed_at'   => $this->whenPivotLoadedAs('progress', 'card_user', function () {
+                return $this->progress->reviewed_at;
             }),
             
             // Relationships
