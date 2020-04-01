@@ -56,7 +56,7 @@ class SessionService
      */
     public function start()
     {
-        if (! $this->areAllCardsInSessionProcessed()) {
+        if (! $this->areAllCardsInSessionReviewed()) {
             abort(422, 'The current session is not completed!');
         } 
 
@@ -74,12 +74,12 @@ class SessionService
     {
         $maxNewCards = $this->getMaxNewCards();
 
-        $processingCardsIDs = $this->user->cards()
+        $reviewingCardsIDs = $this->user->cards()
             ->where('box_id', $this->box->id)
             ->pluck('id');
             
         $cardsIDs = $this->box->cards()
-            ->whereNotIn('id', $processingCardsIDs)
+            ->whereNotIn('id', $reviewingCardsIDs)
             ->take($maxNewCards)
             ->pluck('id');
 
@@ -117,7 +117,7 @@ class SessionService
      */
     public function getNextCard()
     {
-        if ($this->areAllCardsInSessionProcessed()) {
+        if ($this->areAllCardsInSessionReviewed()) {
             abort(422, 'The current session is completed!');
         }
 
@@ -142,7 +142,7 @@ class SessionService
      * @param \App\Card $card
      * @return bool
      */
-    public function processCard($card)
+    public function reviewCard($card)
     {
         if ($card->progress->reviewed_at > $this->sessionStartedAt) {
             abort(422, 'This card has been reviewed before!');
@@ -156,11 +156,11 @@ class SessionService
     }
 
     /**
-     * Determine if all cards are processed in the session.
+     * Determine if all cards are reviewed in the session.
      * 
      * @return bool
      */
-    public function areAllCardsInSessionProcessed()
+    public function areAllCardsInSessionReviewed()
     {
         if (is_null($this->sessionStartedAt)) {
             return true;
@@ -242,11 +242,11 @@ class SessionService
     }
 
     /**
-     * Get the latest card processed in the session.
+     * Get the latest card reviewed in the session.
      * 
      * @return \App\Card
      */
-    public function getLatestProcessedCard()
+    public function getLatestReviewedCard()
     {
         return $this->user->cards()
             ->where('box_id', $this->box->id)
@@ -265,8 +265,8 @@ class SessionService
             return;
         }
 
-        $latestProcessedCardTime = new Carbon($this->getLatestProcessedCard()->progress->reviewed_at);
-        $diffInMin = $latestProcessedCardTime->diffInMinutes(Carbon::now());
+        $latestReviewedCardTime = new Carbon($this->getLatestReviewedCard()->progress->reviewed_at);
+        $diffInMin = $latestReviewedCardTime->diffInMinutes(Carbon::now());
 
         if ($diffInMin > $gapTime * 60) {
             return;

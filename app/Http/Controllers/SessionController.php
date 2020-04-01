@@ -56,13 +56,13 @@ class SessionController extends Controller
     }
 
     /**
-     * Process the given card.
+     * Review the given card.
      * 
      * @todo   check if the given card is associated with the given box.
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function process(Request $request)
+    public function review(Request $request)
     {
         $validatedInput = $this->validate($request, [
             'box_id'    => 'required|numeric',
@@ -78,7 +78,7 @@ class SessionController extends Controller
             $validatedInput['card_id']
         );
 
-        $card = (new SessionService($box))->processCard($card);
+        $card = (new SessionService($box))->reviewCard($card);
         
         return response()->json($card);
     }
