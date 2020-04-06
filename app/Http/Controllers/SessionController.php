@@ -51,6 +51,10 @@ class SessionController extends Controller
         );
 
         $card = (new SessionService($box))->getNextCard();
+
+        if (is_null($card)) {
+            abort(422, 'The current session is completed!');
+        }
         
         return new CardResource($card);
     }

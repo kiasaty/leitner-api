@@ -117,12 +117,9 @@ class SessionService
      */
     public function getNextCard()
     {
-        if ($this->areAllCardsInSessionReviewed()) {
-            abort(422, 'The current session is completed!');
-        }
-
         return $this->user->cards()
             ->where('box_id', $this->box->id)
+            ->where('level', '<>', 5)
             ->where(function ($query) {
                 $query->whereNull('deck')
                       ->orWhere('deck', 'like', "%{$this->session}%");
@@ -162,23 +159,7 @@ class SessionService
      */
     public function areAllCardsInSessionReviewed()
     {
-        if (is_null($this->sessionStartedAt)) {
-            return true;
-        }
-
-        $count = $this->user->cards()
-            ->where('box_id', $this->box->id)
-            ->where(function ($query) {
-                $query->whereNull('deck')
-                      ->orWhere('deck', 'like', "%{$this->session}%");
-            })
-            ->where(function ($query) {
-                $query->whereNull('reviewed_at')
-                      ->orWhere('reviewed_at', '<', $this->sessionStartedAt);
-            })
-            ->count();
-
-        return $count === 0;
+        return is_null($this->getNextCard());
     }
 
     /**
@@ -265,7 +246,13 @@ class SessionService
             return;
         }
 
-        $latestReviewedCardTime = new Carbon($this->getLatestReviewedCard()->progress->reviewed_at);
+        $latestReviewedCard = $this->getLatestReviewedCard();
+
+        if (!$latestReviewedCard) {
+            return;
+        }
+        
+        $latestReviewedCardTime = new Carbon($latestReviewedCard->progress->reviewed_at);
         $diffInMin = $latestReviewedCardTime->diffInMinutes(Carbon::now());
 
         if ($diffInMin > $gapTime * 60) {
