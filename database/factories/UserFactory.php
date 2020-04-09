@@ -23,6 +23,6 @@ $factory->define(User::class, function (Faker $faker) {
         'username'      => $faker->userName,
         'email'         => $faker->email,
         'password'      => app('hash')->make('secret'),
-        // 'profile_photo' => $faker->image,
+        'profile_photo' => $faker->imageUrl,
     ];
 });
