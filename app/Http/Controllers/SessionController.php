@@ -76,8 +76,10 @@ class SessionController extends Controller
             $validatedInput['card_id']
         );
 
-        $card = $session->reviewCard($card, $validatedInput['remember']);
-        
-        return response()->json($card);
+        $session->reviewCard($card, $validatedInput['remember']);
+
+        if ($nextCard = $session->getNextCard()) {
+            return new CardResource($nextCard);
+        }
     }
 }
