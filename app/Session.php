@@ -1,51 +1,33 @@
 <?php
 
-namespace App\Services;
+namespace App;
 
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 
-class SessionService
+class Session extends Model
 {
     /**
-     * @var \Illuminate\Http\Request
+     * Decks of cards.
+     * 
+     * @var array
      */
-    private $request;
+    private $decks = ['0259', '1360', '2471', '3582', '4693', '5704', '6815', '7926', '8037', '9148'];
 
     /**
-     * @var \App\User $user
+     * The box of the session.
      */
-    private $user;
-
-    /**
-     * @var \App\Box
-     */
-    private $box;
-
-    /**
-     * @var int
-     */
-    private $session;
-
-    /**
-     * @var \DateTime
-     */
-    private $sessionStartedAt;
-
-    /**
-     * @param \App\Box $box
-     * @return void
-     */
-    public function __construct($box)
+    public function box()
     {
-        $this->request = request();
+        return $this->belongsTo('App\Box');
+    }
 
-        $this->user = $this->request->user();
-
-        $this->box = $box;
-
-        $this->session = $this->box->subscription->session;
-
-        $this->sessionStartedAt = $this->box->subscription->session_started_at;
+    /**
+     * The user of the session.
+     */
+    public function user()
+    {
+        return $this->belongsTo('App\User');
     }
 
     /**
@@ -56,26 +38,26 @@ class SessionService
      */
     public function start()
     {
-        if (! $this->areAllCardsInSessionReviewed()) {
+        if (! $this->areAllCardsReviewed()) {
             abort(422, 'The current session is not completed!');
         } 
 
         $this->checkIfBreakTimeIsOver();
 
-        $this->attachCards();
+        $this->addNewCards();
 
-        $this->setSession();
+        $this->startNextSession();
     }
 
     /**
      * 
      */
-    private function attachCards()
+    private function addNewCards()
     {
         $maxNewCards = $this->getMaxNewCards();
 
         $reviewingCardsIDs = $this->user->cards()
-            ->where('box_id', $this->box->id)
+            ->where('box_id', $this->box_id)
             ->pluck('id');
             
         $cardsIDs = $this->box->cards()
@@ -98,16 +80,15 @@ class SessionService
     /**
      * 
      */
-    private function setSession()
+    private function startNextSession()
     {
-        $session = is_null($this->sessionStartedAt) || $this->session == 9 ?
+        $this->number = is_null($this->started_at) || $this->number == 9 ?
             0 : 
-            $this->session + 1;
+            $this->number + 1;
+            
+        $this->started_at = Carbon::now();
 
-        return $this->box->users()->updateExistingPivot($this->user->id, [
-            'session'               => $session, 
-            'session_started_at'    => Carbon::now()
-        ]);
+        $this->save();
     }
 
     /**
@@ -118,15 +99,15 @@ class SessionService
     public function getNextCard()
     {
         return $this->user->cards()
-            ->where('box_id', $this->box->id)
+            ->where('box_id', $this->box_id)
             ->where('level', '<>', 5)
             ->where(function ($query) {
                 $query->whereNull('deck')
-                      ->orWhere('deck', 'like', "%{$this->session}%");
+                      ->orWhere('deck', 'like', "%{$this->number}%");
             })
             ->where(function ($query) {
                 $query->whereNull('reviewed_at')
-                      ->orWhere('reviewed_at', '<', $this->sessionStartedAt);
+                      ->orWhere('reviewed_at', '<', $this->started_at);
             })
             ->orderBy('level')
             ->orderBy('card_id')
@@ -136,16 +117,17 @@ class SessionService
     /**
      * If the user remembers the card, move it forward or turn it back to level 1 otherwise.
      * 
+     * @todo if (isReviewed($card) || !isTheLastCardReviewed($card)) abort. 
      * @param \App\Card $card
      * @return bool
      */
-    public function reviewCard($card)
+    public function reviewCard($card, $remember)
     {
-        if ($card->progress->reviewed_at > $this->sessionStartedAt) {
+        if ($card->progress->reviewed_at > $this->started_at) {
             abort(422, 'This card has been reviewed before!');
         }
 
-        if (request('remember')) {
+        if ($remember) {
             return $this->moveCardForwards($card);
         }
 
@@ -157,7 +139,7 @@ class SessionService
      * 
      * @return bool
      */
-    public function areAllCardsInSessionReviewed()
+    public function areAllCardsReviewed()
     {
         return is_null($this->getNextCard());
     }
@@ -179,7 +161,7 @@ class SessionService
         }
 
         if ($level === 1) {
-            $data['deck'] = $this->getDeck();
+            $data['deck'] = $this->getCurrentDeck();
         }
 
         $data['reviewed_at'] = Carbon::now();
@@ -211,32 +193,33 @@ class SessionService
     }
 
     /**
-     * Get the deck id corresponding to t45he current session.
+     * Get the deck id corresponding to the current session.
      * 
      * @return string
      */
-    private function getDeck()
+    private function getCurrentDeck()
     {
-        $decks = ['0259', '1360', '2471', '3582', '4693', '5704', '6815', '7926', '8037', '9148'];
-
-        return $decks[$this->session];
+        return $this->decks[$this->number];
     }
 
     /**
      * Get the latest card reviewed in the session.
      * 
+     * @todo if no cards has been reviewed yet in session, this might throw error.
+     *          add where reviewedAt is smaller than started_at.
      * @return \App\Card
      */
     public function getLatestReviewedCard()
     {
         return $this->user->cards()
-            ->where('box_id', $this->box->id)
+            ->where('box_id', $this->box_id)
             ->latest('reviewed_at')
             ->first();
     }
 
     /**
      * @todo this should be refactored.
+     * @todo maybe is needed to check if the getNextCard returns not empty, then return.
      */
     private function checkIfBreakTimeIsOver()
     {

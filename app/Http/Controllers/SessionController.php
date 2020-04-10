@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use App\Services\SessionService;
 use App\Http\Resources\CardResource;
 
 class SessionController extends Controller
@@ -22,16 +21,13 @@ class SessionController extends Controller
     public function start(Request $request)
     {
         $validatedInput = $this->validate($request, [
-            'box_id'    => 'required|numeric'
+            'box_id'    => 'required|numeric|exists:boxes,id'
         ]);
 
-        $box = $request->user()->boxes()->findOrFail(
-            $validatedInput['box_id']
-        );
+        $session = $request->user()->sessions()
+            ->where('box_id', $validatedInput['box_id'])->first();
 
-        $result = (new SessionService($box))->start();
-
-        return response()->json($result);
+        $session->start();
     }
 
     /**
@@ -46,11 +42,10 @@ class SessionController extends Controller
             'box_id'    => 'required|numeric'
         ]);
 
-        $box = $request->user()->boxes()->findOrFail(
-            $validatedInput['box_id']
-        );
+        $session = $request->user()->sessions()
+            ->where('box_id', $validatedInput['box_id'])->first();
 
-        $card = (new SessionService($box))->getNextCard();
+        $card = $session->getNextCard();
 
         if (is_null($card)) {
             abort(422, 'The current session is completed!');
@@ -74,15 +69,14 @@ class SessionController extends Controller
             'remember'  => 'required|boolean'
         ]);
 
-        $box = $request->user()->boxes()->findOrFail(
-            $validatedInput['box_id']
-        );
+        $session = $request->user()->sessions()
+            ->where('box_id', $validatedInput['box_id'])->first();
 
         $card = $request->user()->cards()->findOrFail(
             $validatedInput['card_id']
         );
 
-        $card = (new SessionService($box))->reviewCard($card);
+        $card = $session->reviewCard($card, $validatedInput['remember']);
         
         return response()->json($card);
     }

@@ -26,9 +26,9 @@ class Box extends Model
      */
     public function users()
     {
-        return $this->belongsToMany('App\User')
-            ->as('subscription')
-            ->withPivot(['session', 'session_started_at']);
+        return $this->belongsToMany('App\User', 'sessions')
+            ->as('session')
+            ->withPivot(['number', 'started_at']);
     }
 
     /**
@@ -37,5 +37,13 @@ class Box extends Model
     public function cards()
     {
         return $this->hasMany('App\Card');
+    }
+
+    /**
+     * The learning sessions associated with the box.
+     */
+    public function sessions()
+    {
+        return $this->hasMany('App\Session');
     }
 }

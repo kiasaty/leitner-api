@@ -52,9 +52,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public function boxes()
     {
-        return $this->belongsToMany('App\Box')
-            ->as('subscription')
-            ->withPivot(['session', 'session_started_at']);
+        return $this->belongsToMany('App\Box', 'sessions')
+            ->as('session')
+            ->withPivot(['number', 'started_at']);
     }
 
     /**
@@ -65,5 +65,13 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $this->belongsToMany('App\Card')
             ->as('progress')
             ->withPivot(['level', 'deck', 'reviewed_at']);
+    }
+
+    /**
+     * The learning sessions associated with the user.
+     */
+    public function sessions()
+    {
+        return $this->hasMany('App\Session');
     }
 }
