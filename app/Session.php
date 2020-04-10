@@ -117,13 +117,12 @@ class Session extends Model
     /**
      * If the user remembers the card, move it forward or turn it back to level 1 otherwise.
      * 
-     * @todo if (isReviewed($card) || !isTheLastCardReviewed($card)) abort. 
      * @param \App\Card $card
      * @return bool
      */
-    public function reviewCard($card, $remember)
+    public function review($card, $remember)
     {
-        if ($card->progress->reviewed_at > $this->started_at) {
+        if ($this->isReviewed($card) && !$this->isTheLastReviewedCard($card)) {
             abort(422, 'This card has been reviewed before!');
         }
 
@@ -132,6 +131,34 @@ class Session extends Model
         }
 
         return $this->moveCardBackwards($card);
+    }
+    
+    /**
+     * Check if the card is reviewed.
+     * 
+     * @param \App\Card $card
+     * @return bool
+     */
+    public function isReviewed($card)
+    {
+        return $card->progress->reviewed_at > $this->started_at;
+    }
+
+    /**
+     * Check if the card is the latest reviewed card.
+     * 
+     * @param \App\Card $card
+     * @return bool
+     */
+    public function isTheLastReviewedCard($card)
+    {
+        $latestReviewedCard = $this->getLatestReviewedCard();
+
+        if (!$latestReviewedCard) {
+            return false;
+        }
+
+        return $card->id === $latestReviewedCard->id;
     }
 
     /**
