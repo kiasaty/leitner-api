@@ -24,8 +24,7 @@ class UserController extends Controller
     {
         $users = User::all();
         
-        return UserResource::collection($users)
-            ->additional(['success' => true ]);
+        return UserResource::collection($users);
     }
 
     /**

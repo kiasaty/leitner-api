@@ -28,8 +28,7 @@ class BoxCardController extends Controller
             $request->query('per_page')
         );
         
-        return CardResource::collection($cards)
-            ->additional(['success' => true ]);
+        return CardResource::collection($cards);
     }
 
     /**

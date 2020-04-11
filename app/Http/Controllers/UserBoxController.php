@@ -25,8 +25,7 @@ class UserBoxController extends Controller
 
         $boxes = $user->createdBoxes;
         
-        return BoxResource::collection($boxes)
-            ->additional(['success' => true ]);
+        return BoxResource::collection($boxes);
     }
 
     /**

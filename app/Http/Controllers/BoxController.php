@@ -16,8 +16,7 @@ class BoxController extends Controller
     {
         $boxes = Box::all();
         
-        return BoxResource::collection($boxes)
-            ->additional(['success' => true ]);
+        return BoxResource::collection($boxes);
     }
 
     /**
