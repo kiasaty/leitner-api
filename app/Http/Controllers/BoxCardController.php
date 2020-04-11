@@ -22,8 +22,10 @@ class BoxCardController extends Controller
     public function index($boxID)
     {
         $box = Box::findOrFail($boxID);
+
+        $cards = $box->cards()->paginate();
         
-        return CardResource::collection($box->cards)
+        return CardResource::collection($cards)
             ->additional(['success' => true ]);
     }
 
