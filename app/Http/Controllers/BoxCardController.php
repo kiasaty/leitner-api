@@ -16,14 +16,17 @@ class BoxCardController extends Controller
     /**
      * Get all cards
      *
+     * @param  \Illuminate\Http\Request  $request
      * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function index($boxID)
+    public function index(Request $request, $boxID)
     {
         $box = Box::findOrFail($boxID);
 
-        $cards = $box->cards()->paginate();
+        $cards = $box->cards()->latest()->paginate(
+            $request->query('per_page')
+        );
         
         return CardResource::collection($cards)
             ->additional(['success' => true ]);
