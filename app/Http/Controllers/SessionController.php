@@ -28,6 +28,10 @@ class SessionController extends Controller
             ->where('box_id', $validatedInput['box_id'])->first();
 
         $session->start();
+
+        if ($nextCard = $session->getNextCard()) {
+            return new CardResource($nextCard);
+        }
     }
 
     /**
