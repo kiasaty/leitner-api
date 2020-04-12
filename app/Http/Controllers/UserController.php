@@ -22,6 +22,8 @@ class UserController extends Controller
      */
     public function index()
     {
+        $this->authorize('index', User::class);
+
         $users = User::all();
         
         return UserResource::collection($users);
@@ -57,6 +59,8 @@ class UserController extends Controller
      */
     public function show($id)
     {
+        $this->authorize('show', User::class);
+        
         $user = User::findOrFail($id);
 
         return new UserResource($user);
@@ -72,6 +76,8 @@ class UserController extends Controller
      */
     public function update(Request $request, $id)
     {
+        $this->authorize('update', User::class);
+        
         $user = User::findOrFail($id);
 
         $validatedInput = $this->validateInput($request, $user);
@@ -99,6 +105,8 @@ class UserController extends Controller
      */
     public function destroy($id)
     {
+        $this->authorize('destroy', User::class);
+        
         $user = User::findOrFail($id);
 
         $user->delete();
