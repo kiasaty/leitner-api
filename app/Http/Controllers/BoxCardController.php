@@ -42,6 +42,8 @@ class BoxCardController extends Controller
     {
         $box = Box::findOrFail($boxID);
 
+        $this->authorize('update', $box);
+
         $validatedInput = $this->validateInput($request);
 
         $card = $box->cards()->create($validatedInput);
@@ -77,6 +79,8 @@ class BoxCardController extends Controller
     {
         $box = Box::findOrFail($boxID);
 
+        $this->authorize('update', $box);
+
         $card = $box->cards()->findOrFail($cardID);
 
         $validatedInput = $this->validateInput($request);
@@ -96,6 +100,8 @@ class BoxCardController extends Controller
     public function destroy($boxID, $cardID)
     {
         $box = Box::findOrFail($boxID);
+
+        $this->authorize('update', $box);
 
         $card = $box->cards()->findOrFail($cardID);
 
