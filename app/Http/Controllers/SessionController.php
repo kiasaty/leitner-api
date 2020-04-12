@@ -27,6 +27,8 @@ class SessionController extends Controller
         $session = $request->user()->sessions()
             ->where('box_id', $validatedInput['box_id'])->first();
 
+        $this->authorize('update', $session);
+
         $session->start();
 
         if ($nextCard = $session->getNextCard()) {
@@ -48,6 +50,8 @@ class SessionController extends Controller
 
         $session = $request->user()->sessions()
             ->where('box_id', $validatedInput['box_id'])->first();
+
+        $this->authorize('update', $session);
 
         $card = $session->getNextCard();
 
@@ -75,6 +79,8 @@ class SessionController extends Controller
 
         $session = $request->user()->sessions()
             ->where('box_id', $validatedInput['box_id'])->first();
+
+        $this->authorize('update', $session);
 
         $card = $request->user()->cards()->findOrFail(
             $validatedInput['card_id']
