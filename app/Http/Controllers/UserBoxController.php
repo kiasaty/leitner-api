@@ -78,6 +78,8 @@ class UserBoxController extends Controller
 
         $box = $user->createdBoxes()->findOrFail($boxID);
 
+        $this->authorize('update', $box);
+
         $validatedInput = $this->validateInput($request);
 
         $box->update($validatedInput);
@@ -97,6 +99,8 @@ class UserBoxController extends Controller
         $user = User::findOrFail($userID);
 
         $box = $user->createdBoxes()->findOrFail($boxID);
+
+        $this->authorize('update', $box);
 
         $box->delete();
     }
