@@ -24,6 +24,12 @@ class BoxCardController extends Controller
     {
         $box = Box::findOrFail($boxID);
 
+        $this->validate($request, [
+            'page'      => 'nullable|numeric',
+            'per_page'  => 'nullable|numeric',
+            'sort'      => 'nullable|in:id,-id,front,-front,created_at,-created_at,updated_at,-updated_at'
+        ]);
+
         $cards = $box->cards()->latest()->paginate(
             $request->query('per_page')
         );
