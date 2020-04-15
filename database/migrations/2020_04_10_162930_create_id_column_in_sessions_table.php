@@ -14,7 +14,7 @@ class CreateIdColumnInSessionsTable extends Migration
     public function up()
     {
         Schema::table('sessions', function (Blueprint $table) {
-            $table->dropIndex('box_user_user_id_foreign');
+            $table->dropForeign('box_user_user_id_foreign');
             $table->dropForeign('box_user_box_id_foreign');
             $table->dropPrimary();
         });
