@@ -27,6 +27,7 @@ class BoxCardController extends Controller
         $this->validate($request, [
             'page'      => 'nullable|numeric',
             'per_page'  => 'nullable|numeric',
+            'q'         => 'nullable|string',
             'sort'      => 'nullable|in:id,-id,front,-front,created_at,-created_at,updated_at,-updated_at'
         ]);
 
