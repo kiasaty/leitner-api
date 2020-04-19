@@ -122,7 +122,7 @@ class Session extends Model
      */
     public function review($card, $remember)
     {
-        if ($this->isReviewed($card) && !$this->isTheLastReviewedCard($card)) {
+        if ($this->isReviewed($card)) {
             abort(422, 'This card has been reviewed before!');
         }
 
@@ -142,23 +142,6 @@ class Session extends Model
     public function isReviewed($card)
     {
         return $card->progress->reviewed_at > $this->started_at;
-    }
-
-    /**
-     * Check if the card is the latest reviewed card.
-     * 
-     * @param \App\Card $card
-     * @return bool
-     */
-    public function isTheLastReviewedCard($card)
-    {
-        $latestReviewedCard = $this->getLatestReviewedCard();
-
-        if (!$latestReviewedCard) {
-            return false;
-        }
-
-        return $card->id === $latestReviewedCard->id;
     }
 
     /**
