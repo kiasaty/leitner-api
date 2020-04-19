@@ -127,10 +127,10 @@ class Session extends Model
         }
 
         if ($remember) {
-            return $this->moveCardForwards($card);
+            return $this->promoteCard($card);
         }
 
-        return $this->moveCardBackwards($card);
+        return $this->demoteCard($card);
     }
     
     /**
@@ -160,7 +160,7 @@ class Session extends Model
      * @param \App\Card $card
      * @return bool
      */
-    private function moveCardForwards($card)
+    private function promoteCard($card)
     {
         $level = $card->progress->level;
 
@@ -188,11 +188,12 @@ class Session extends Model
      * @param \App\Card $card
      * @return bool
      */
-    private function moveCardBackwards($card)
+    private function demoteCard($card)
     {
         $data = [
             'level'         => 1,
             'deck'          => null,
+            'difficulty'    => $card->progress->difficulty + 1,
             'reviewed_at'   => Carbon::now()
         ];
 
