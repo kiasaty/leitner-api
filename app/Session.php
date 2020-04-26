@@ -38,11 +38,15 @@ class Session extends Model
      */
     public function start()
     {
-        if (! $this->areAllCardsReviewed()) {
+        if ($this->started_at && !$this->areAllCardsReviewed()) {
             abort(422, 'The current session is not completed!');
         } 
 
         $this->checkIfBreakTimeIsOver();
+
+        if (!$this->isThereAnyCardsToLearn()) {
+            abort(422, 'There is no cards to learn!');
+        }
 
         $this->addNewCards();
 
@@ -69,6 +73,29 @@ class Session extends Model
     }
 
     /**
+     * 
+     */
+    private function isThereAnyCardsToLearn()
+    {
+        $isThereAnyCardInSessionToLearn = $this->user->cards()
+            ->where('box_id', $this->box_id)
+            ->where('level', '<>', 5)
+            ->exists();
+
+        if ($isThereAnyCardInSessionToLearn) {
+            return true;
+        }
+
+        $reviewingCardsIDs = $this->user->cards()
+            ->where('box_id', $this->box_id)
+            ->pluck('id');
+            
+        return $this->box->cards()
+            ->whereNotIn('id', $reviewingCardsIDs)
+            ->exists();
+    }
+
+    /**
      * @todo an abilicty for the user to select the maxNewCards for each box.
      *          which overrides the default maxNewCards number.
      */
@@ -80,11 +107,17 @@ class Session extends Model
     /**
      * 
      */
+    private function getNextSessionNumber() 
+    {
+        return is_null($this->started_at) || $this->number == 9 ? 0 : $this->number + 1;
+    }
+
+    /**
+     * 
+     */
     private function startNextSession()
     {
-        $this->number = is_null($this->started_at) || $this->number == 9 ?
-            0 : 
-            $this->number + 1;
+        $this->number = $this->getNextSessionNumber();
             
         $this->started_at = Carbon::now();
 

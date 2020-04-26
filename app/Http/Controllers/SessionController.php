@@ -53,6 +53,10 @@ class SessionController extends Controller
 
         $this->authorize('update', $session);
 
+        if (is_null($session->started_at)) {
+            abort(422, 'There is no acive session!');
+        }
+
         $card = $session->getNextCard();
 
         if (is_null($card)) {
