@@ -45,6 +45,6 @@ class Card extends Model
     {
         return $this->belongsToMany('App\User')
             ->as('progress')
-            ->withPivot(['level', 'deck_id', 'reviewed_at']);
+            ->withPivot(['level', 'deck_id', 'difficulty', 'reviewed_at']);
     }
 }
