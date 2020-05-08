@@ -233,6 +233,8 @@ class Session extends Model
 
         if ($level === 1) {
             $data['deck_id'] = $this->getCurrentDeck();
+        } else if ($level === 4) {
+            $data['deck_id'] = 12;
         }
 
         $data['reviewed_at'] = Carbon::now();
