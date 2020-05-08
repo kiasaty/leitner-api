@@ -3,6 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
+use App\Session;
 
 class CardResource extends JsonResource
 {
@@ -29,7 +30,7 @@ class CardResource extends JsonResource
                 return $this->progress->level;
             }),
             'deck'          => $this->whenPivotLoadedAs('progress', 'card_user', function () {
-                return $this->progress->deck;
+                return Session::DECKS[$this->progress->deck_id];
             }),
             'reviewed_at'   => $this->whenPivotLoadedAs('progress', 'card_user', function () {
                 return $this->progress->reviewed_at;

@@ -12,7 +12,39 @@ class Session extends Model
      * 
      * @var array
      */
-    private $decks = ['0259', '1360', '2471', '3582', '4693', '5704', '6815', '7926', '8037', '9148'];
+    public const DECKS = [
+        1   => 'Current',
+        2   => '0-2-5-9',
+        3   => '1-3-6-0',
+        4   => '2-4-7-1',
+        5   => '3-5-8-2',
+        6   => '4-6-9-3',
+        7   => '5-7-0-4',
+        8   => '6-8-1-5',
+        9   => '7-9-2-6',
+        10  => '8-0-3-7',
+        11  => '9-1-4-8',
+        12  => 'Retired'
+    ];
+
+    /**
+     * 
+     */
+    private function getDecks()
+    {
+        return preg_grep("/(Current|{$this->number})/i", self::DECKS);
+    }
+
+    /**
+     * Get the user's first name.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    public function getDecksIdsAttribute($value)
+    {
+        return array_keys($this->getDecks());
+    }
 
     /**
      * The box of the session.
@@ -86,12 +118,12 @@ class Session extends Model
             return true;
         }
 
-        $reviewingCardsIDs = $this->user->cards()
+        $sessionCardsIDs = $this->user->cards()
             ->where('box_id', $this->box_id)
             ->pluck('id');
             
         return $this->box->cards()
-            ->whereNotIn('id', $reviewingCardsIDs)
+            ->whereNotIn('id', $sessionCardsIDs)
             ->exists();
     }
 
@@ -133,11 +165,7 @@ class Session extends Model
     {
         return $this->user->cards()
             ->where('box_id', $this->box_id)
-            ->where('level', '<>', 5)
-            ->where(function ($query) {
-                $query->whereNull('deck')
-                      ->orWhere('deck', 'like', "%{$this->number}%");
-            })
+            ->whereIn('deck_id', $this->decks_ids)
             ->where(function ($query) {
                 $query->whereNull('reviewed_at')
                       ->orWhere('reviewed_at', '<', $this->started_at);
@@ -204,7 +232,7 @@ class Session extends Model
         }
 
         if ($level === 1) {
-            $data['deck'] = $this->getCurrentDeck();
+            $data['deck_id'] = $this->getCurrentDeck();
         }
 
         $data['reviewed_at'] = Carbon::now();
@@ -225,7 +253,7 @@ class Session extends Model
     {
         $data = [
             'level'         => 1,
-            'deck'          => null,
+            'deck_id'       => 1,
             'difficulty'    => $card->progress->difficulty + 1,
             'reviewed_at'   => Carbon::now()
         ];
@@ -243,7 +271,7 @@ class Session extends Model
      */
     private function getCurrentDeck()
     {
-        return $this->decks[$this->number];
+        return array_keys(preg_grep("/^{$this->number}/i", self::DECKS))[0];
     }
 
     /**
