@@ -125,7 +125,7 @@ class BoxCardController extends Controller
     {
         $rules = [
             'front' => ['required', 'string',' min:2', 'max:250'],
-            'back'  => ['required', 'string', 'min:3', 'max:1000']
+            'back'  => ['required', 'string', 'min:2', 'max:2000']
         ];
 
         if ($request->isMethod('put')) {
