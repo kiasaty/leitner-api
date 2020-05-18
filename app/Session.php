@@ -8,6 +8,13 @@ use Illuminate\Database\Eloquent\Model;
 class Session extends Model
 {
     /**
+     * The attributes that are mass assignable.
+     *
+     * @var array
+     */
+    protected $guarded = [];
+    
+    /**
      * Decks of cards.
      * 
      * @var array
@@ -70,7 +77,7 @@ class Session extends Model
      */
     public function start()
     {
-        if ($this->started_at && !$this->areAllCardsReviewed()) {
+        if ($this->started_at && !$this->ended_at) {
             abort(422, 'The current session is not completed!');
         } 
 
@@ -83,6 +90,16 @@ class Session extends Model
         $this->addNewCards();
 
         $this->startNextSession();
+    }
+
+    /**
+     * 
+     */
+    public function end()
+    {
+        $this->update([
+            'ended_at' => Carbon::now()
+        ]);
     }
 
     /**
@@ -139,21 +156,13 @@ class Session extends Model
     /**
      * 
      */
-    private function getNextSessionNumber() 
-    {
-        return is_null($this->started_at) || $this->number == 9 ? 0 : $this->number + 1;
-    }
-
-    /**
-     * 
-     */
     private function startNextSession()
     {
-        $this->number = $this->getNextSessionNumber();
-            
-        $this->started_at = Carbon::now();
-
-        $this->save();
+        $this->update([
+            'number' => is_null($this->started_at) || $this->number == 9 ? 0 : $this->number + 1,  
+            'started_at' => Carbon::now(),
+            'ended_at' => null
+        ]);
     }
 
     /**
@@ -203,16 +212,6 @@ class Session extends Model
     public function isReviewed($card)
     {
         return $card->progress->reviewed_at > $this->started_at;
-    }
-
-    /**
-     * Determine if all cards are reviewed in the session.
-     * 
-     * @return bool
-     */
-    public function areAllCardsReviewed()
-    {
-        return is_null($this->getNextCard());
     }
 
     /**

@@ -57,11 +57,11 @@ class SessionController extends Controller
             abort(422, 'There is no acive session!');
         }
 
-        $card = $session->getNextCard();
-
-        if (is_null($card)) {
+        if ($session->end_at) {
             abort(422, 'The current session is completed!');
         }
+
+        $card = $session->getNextCard();
         
         return new CardResource($card);
     }
@@ -94,6 +94,8 @@ class SessionController extends Controller
 
         if ($nextCard = $session->getNextCard()) {
             return new CardResource($nextCard);
+        } else {
+            $session->end();
         }
     }
 }
