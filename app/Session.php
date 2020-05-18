@@ -276,52 +276,26 @@ class Session extends Model
     }
 
     /**
-     * Get the latest card reviewed in the session.
      * 
-     * @todo if no cards has been reviewed yet in session, this might throw error.
-     *          add where reviewedAt is smaller than started_at.
-     * @return \App\Card
-     */
-    public function getLatestReviewedCard()
-    {
-        return $this->user->cards()
-            ->where('box_id', $this->box_id)
-            ->latest('reviewed_at')
-            ->first();
-    }
-
-    /**
-     * @todo this should be refactored.
-     * @todo maybe is needed to check if the getNextCard returns not empty, then return.
      */
     private function checkIfBreakTimeIsOver()
     {
-        $gapTime = config('session.gap_time');
+        $sessionEndTime = $this->ended_at;
 
-        if ($gapTime <= 0) {
+        if (!$sessionEndTime) {
             return;
         }
 
-        $latestReviewedCard = $this->getLatestReviewedCard();
-
-        if (!$latestReviewedCard) {
-            return;
-        }
+        $sessionEndTime = Carbon::parse($sessionEndTime);
         
-        $latestReviewedCardTime = new Carbon($latestReviewedCard->progress->reviewed_at);
-        $diffInMin = $latestReviewedCardTime->diffInMinutes(Carbon::now());
+        $gapTimeBetweenSessions = config('session.gap_time');
 
-        if ($diffInMin > $gapTime * 60) {
+        if ($sessionEndTime->diffInMinutes() > $gapTimeBetweenSessions) {
             return;
         }
 
-        $hours = $gapTime - ceil($diffInMin / 60);
-        $minutes = 60 - $diffInMin % 60;
+        $diffForHumans = $sessionEndTime->addMinutes($gapTimeBetweenSessions)->diffForHumans(['parts' => 3]);
 
-        $timeLeft = $hours ? "$hours hours" : '';
-        $timeLeft .= $hours && $minutes ? " and " : '';
-        $timeLeft .= $minutes ? "$minutes minutes" : '';
-
-        abort(422, "Next session can be started after $timeLeft.");
+        abort(422, "The next session can be started in $diffForHumans.");
     }
 }
