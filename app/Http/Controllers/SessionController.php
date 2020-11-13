@@ -14,18 +14,17 @@ class SessionController extends Controller
 
     /**
      * Start a new learning session.
-     * 
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function start(Request $request)
     {
         $validatedInput = $this->validate($request, [
-            'box_id'    => 'required|numeric|exists:boxes,id'
+            'box_id' => 'required|numeric|exists:boxes,id'
         ]);
 
-        $session = $request->user()->sessions()
-            ->where('box_id', $validatedInput['box_id'])->first();
+        $session = $request->user()->getSessionByBoxID($validatedInput['box_id']);
 
         $this->authorize('update', $session);
 
@@ -38,7 +37,7 @@ class SessionController extends Controller
 
     /**
      * Get the next card.
-     * 
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
@@ -48,16 +47,15 @@ class SessionController extends Controller
             'box_id'    => 'required|numeric'
         ]);
 
-        $session = $request->user()->sessions()
-            ->where('box_id', $validatedInput['box_id'])->first();
+        $session = $request->user()->getSessionByBoxID($validatedInput['box_id']);
 
         $this->authorize('update', $session);
 
-        if (is_null($session->started_at)) {
+        if (! $session->isRunning()) {
             abort(422, 'There is no acive session!');
         }
 
-        if ($session->end_at) {
+        if ($session->isCompleted()) {
             abort(422, 'The current session is completed!');
         }
 
@@ -68,7 +66,7 @@ class SessionController extends Controller
 
     /**
      * Review the given card.
-     * 
+     *
      * @todo   check if the given card is associated with the given box.
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -81,14 +79,13 @@ class SessionController extends Controller
             'remember'  => 'required|boolean'
         ]);
 
-        $session = $request->user()->sessions()
-            ->where('box_id', $validatedInput['box_id'])->first();
+        $user = $request->user();
+        
+        $session = $user->getSessionByBoxID($validatedInput['box_id']);
 
         $this->authorize('update', $session);
 
-        $card = $request->user()->cards()->findOrFail(
-            $validatedInput['card_id']
-        );
+        $card = $user->getCard($validatedInput['card_id']);
 
         $session->review($card, $validatedInput['remember']);
 
