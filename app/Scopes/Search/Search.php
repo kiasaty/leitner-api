@@ -11,11 +11,11 @@ class Search implements Scope
     /**
      * Apply the scope to a given Eloquent query builder.
      *
-     * @param  \Illuminate\Database\Eloquent\Builder  $builder
+     * @param  \Illuminate\Database\Eloquent\Builder  $query
      * @param  \Illuminate\Database\Eloquent\Model  $model
      * @return void
      */
-    public function apply(Builder $builder, Model $model)
+    public function apply(Builder $query, Model $model)
     {
         $value = request('q');
 
@@ -25,8 +25,8 @@ class Search implements Scope
 
         foreach ($model->searchables as $key => $searchable) {
             $key === 0 ?
-                $builder->where($searchable, 'like', "%$value%") :
-                $builder->orWhere($searchable, 'like', "%$value%");
+                $query->where($searchable, 'like', "%$value%") :
+                $query->orWhere($searchable, 'like', "%$value%");
         }
     }
 }
