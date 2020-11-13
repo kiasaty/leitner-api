@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Usecases\SessionStarter;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 
@@ -16,7 +17,7 @@ class Session extends Model
     
     /**
      * Decks of cards.
-     * 
+     *
      * @var array
      */
     public const DECKS = [
@@ -35,7 +36,7 @@ class Session extends Model
     ];
 
     /**
-     * 
+     *
      */
     private function getDecks()
     {
@@ -43,12 +44,11 @@ class Session extends Model
     }
 
     /**
-     * Get the user's first name.
+     * Get the decks_ids.
      *
-     * @param  string  $value
      * @return string
      */
-    public function getDecksIdsAttribute($value)
+    public function getDecksIdsAttribute()
     {
         return array_keys($this->getDecks());
     }
@@ -71,29 +71,17 @@ class Session extends Model
 
     /**
      * Start a new learning session.
-     * 
+     *
      * @todo Refactor this.
      * @return bool
      */
     public function start()
     {
-        if ($this->started_at && !$this->ended_at) {
-            abort(422, 'The current session is not completed!');
-        } 
-
-        $this->checkIfBreakTimeIsOver();
-
-        if (!$this->isThereAnyCardsToLearn()) {
-            abort(422, 'There is no cards to learn!');
-        }
-
-        $this->addNewCards();
-
-        $this->startNextSession();
+        return (new SessionStarter($this))->start();
     }
 
     /**
-     * 
+     *
      */
     public function end()
     {
@@ -103,71 +91,8 @@ class Session extends Model
     }
 
     /**
-     * 
-     */
-    private function addNewCards()
-    {
-        $maxNewCards = $this->getMaxNewCards();
-
-        $reviewingCardsIDs = $this->user->cards()
-            ->where('box_id', $this->box_id)
-            ->pluck('id');
-            
-        $cardsIDs = $this->box->cards()
-            ->whereNotIn('id', $reviewingCardsIDs)
-            ->take($maxNewCards)
-            ->pluck('id');
-
-        return $this->user->cards()->attach($cardsIDs);
-    }
-
-    /**
-     * 
-     */
-    private function isThereAnyCardsToLearn()
-    {
-        $isThereAnyCardInSessionToLearn = $this->user->cards()
-            ->where('box_id', $this->box_id)
-            ->where('level', '<>', 5)
-            ->exists();
-
-        if ($isThereAnyCardInSessionToLearn) {
-            return true;
-        }
-
-        $sessionCardsIDs = $this->user->cards()
-            ->where('box_id', $this->box_id)
-            ->pluck('id');
-            
-        return $this->box->cards()
-            ->whereNotIn('id', $sessionCardsIDs)
-            ->exists();
-    }
-
-    /**
-     * @todo an abilicty for the user to select the maxNewCards for each box.
-     *          which overrides the default maxNewCards number.
-     */
-    private function getMaxNewCards()
-    {
-        return config('session.default_max_new_cards');
-    }
-
-    /**
-     * 
-     */
-    private function startNextSession()
-    {
-        $this->update([
-            'number' => is_null($this->started_at) || $this->number == 9 ? 0 : $this->number + 1,  
-            'started_at' => Carbon::now(),
-            'ended_at' => null
-        ]);
-    }
-
-    /**
      * Get the next card in the session.
-     * 
+     *
      * @return \App\Card
      */
     public function getNextCard()
@@ -186,7 +111,7 @@ class Session extends Model
 
     /**
      * If the user remembers the card, move it forward or turn it back to level 1 otherwise.
-     * 
+     *
      * @param \App\Card $card
      * @return bool
      */
@@ -205,7 +130,7 @@ class Session extends Model
     
     /**
      * Check if the card is reviewed.
-     * 
+     *
      * @param \App\Card $card
      * @return bool
      */
@@ -216,7 +141,7 @@ class Session extends Model
 
     /**
      * Move the card one level forward.
-     * 
+     *
      * @param \App\Card $card
      * @return bool
      */
@@ -232,7 +157,7 @@ class Session extends Model
 
         if ($level === 1) {
             $data['deck_id'] = $this->getCurrentDeck();
-        } else if ($level === 4) {
+        } elseif ($level === 4) {
             $data['deck_id'] = 12;
         }
 
@@ -246,7 +171,7 @@ class Session extends Model
 
     /**
      * Turn back the card to level 1.
-     * 
+     *
      * @param \App\Card $card
      * @return bool
      */
@@ -267,7 +192,7 @@ class Session extends Model
 
     /**
      * Get the deck id corresponding to the current session.
-     * 
+     *
      * @return string
      */
     private function getCurrentDeck()
@@ -276,26 +201,32 @@ class Session extends Model
     }
 
     /**
-     * 
+     * Check if the session is started.
+     *
+     * @return bool
      */
-    private function checkIfBreakTimeIsOver()
+    public function isStarted()
     {
-        $sessionEndTime = $this->ended_at;
+        return (bool) $this->started_at;
+    }
 
-        if (!$sessionEndTime) {
-            return;
-        }
+    /**
+     * Check if the session is completed.
+     *
+     * @return bool
+     */
+    public function isCompleted()
+    {
+        return (bool) $this->ended_at;
+    }
 
-        $sessionEndTime = Carbon::parse($sessionEndTime);
-        
-        $gapTimeBetweenSessions = config('session.gap_time');
-
-        if ($sessionEndTime->diffInMinutes() > $gapTimeBetweenSessions) {
-            return;
-        }
-
-        $diffForHumans = $sessionEndTime->addMinutes($gapTimeBetweenSessions)->diffForHumans(['parts' => 3]);
-
-        abort(422, "The next session can be started in $diffForHumans.");
+    /**
+     * Check if the session is running.
+     *
+     * @return bool
+     */
+    public function isRunning()
+    {
+        return $this->isStarted() && !$this->isCompleted();
     }
 }
