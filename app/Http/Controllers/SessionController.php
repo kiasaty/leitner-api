@@ -61,7 +61,6 @@ class SessionController extends Controller
     /**
      * Review the given card.
      *
-     * @todo   check if the given card is associated with the given box.
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $boxID
      * @return \Illuminate\Http\Response
@@ -73,15 +72,14 @@ class SessionController extends Controller
             'remember'  => 'required|boolean'
         ]);
 
-        $user = $request->user();
-        
-        $session = $user->getSessionByBoxID($boxID);
+        $session = $request->user()->getSessionByBoxID($boxID);
 
         $this->authorize('update', $session);
 
-        $card = $user->getCard($validatedInput['card_id']);
-
-        $session->review($card, $validatedInput['remember']);
+        $session->review(
+            $validatedInput['card_id'],
+            $validatedInput['remember']
+        );
 
         if ($nextCard = $session->getNextCard()) {
             return new CardResource($nextCard);

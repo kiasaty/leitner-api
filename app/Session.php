@@ -2,8 +2,9 @@
 
 namespace App;
 
-use App\Usecases\SessionStarter;
 use Carbon\Carbon;
+use App\Usecases\CardReviewer;
+use App\Usecases\SessionStarter;
 use Illuminate\Database\Eloquent\Model;
 
 class Session extends Model
@@ -110,31 +111,26 @@ class Session extends Model
     }
 
     /**
-     * If the user remembers the card, move it forward or turn it back to level 1 otherwise.
+     * Review a card in the session.
      *
-     * @param \App\Card $card
-     * @return bool
+     * @param  int $cardID
+     * @param  int  $remember
+     * @return void
      */
-    public function review($card, $remember)
+    public function review($cardID, $remember)
     {
-        if ($this->isReviewed($card)) {
-            abort(422, 'This card has been reviewed before!');
-        }
+        $card = $this->getCard($cardID);
 
-        if ($remember) {
-            return $this->promoteCard($card);
-        }
-
-        return $this->demoteCard($card);
+        (new CardReviewer($this, $card, $remember))->review();
     }
     
     /**
-     * Check if the card is reviewed.
+     * Check if the card has been reviewed.
      *
      * @param \App\Card $card
      * @return bool
      */
-    public function isReviewed($card)
+    public function isCardReviewed($card)
     {
         return $card->progress->reviewed_at > $this->started_at;
     }
@@ -145,7 +141,7 @@ class Session extends Model
      * @param \App\Card $card
      * @return bool
      */
-    private function promoteCard($card)
+    public function promoteCard($card)
     {
         $level = $card->progress->level;
 
@@ -175,7 +171,7 @@ class Session extends Model
      * @param \App\Card $card
      * @return bool
      */
-    private function demoteCard($card)
+    public function demoteCard($card)
     {
         $data = [
             'level'         => 1,
@@ -228,5 +224,31 @@ class Session extends Model
     public function isRunning()
     {
         return $this->isStarted() && !$this->isCompleted();
+    }
+
+    /**
+     * @todo if a cardID which is not for the session is passed, and the user has the card in another session, the card will be returned.
+     *        a session_id in needed in the card_user table.
+     * @todo refactor this after adding session_id in card_user table.
+     *
+     * @param  int  $cardID
+     * @return \App\Card
+     */
+    public function getCard($cardID)
+    {
+        return $this->user->getCard($cardID);
+    }
+
+    /**
+     * Check if the card is present in the session.
+     *
+     * @todo refactor this after adding session_id in card_user table.
+     *
+     * @param  \App\Card  $card
+     * @return bool
+     */
+    public function hasCard($card)
+    {
+        return (bool) $this->getCard($card->id);
     }
 }
