@@ -16,15 +16,12 @@ class SessionController extends Controller
      * Start a new learning session.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function start(Request $request)
+    public function start(Request $request, $boxID)
     {
-        $validatedInput = $this->validate($request, [
-            'box_id' => 'required|numeric|exists:boxes,id'
-        ]);
-
-        $session = $request->user()->getSessionByBoxID($validatedInput['box_id']);
+        $session = $request->user()->getSessionByBoxID($boxID);
 
         $this->authorize('update', $session);
 
@@ -39,15 +36,12 @@ class SessionController extends Controller
      * Get the next card.
      *
      * @param  \Illuminate\Http\Request  $request
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function next(Request $request)
+    public function next(Request $request, $boxID)
     {
-        $validatedInput = $this->validate($request, [
-            'box_id'    => 'required|numeric'
-        ]);
-
-        $session = $request->user()->getSessionByBoxID($validatedInput['box_id']);
+        $session = $request->user()->getSessionByBoxID($boxID);
 
         $this->authorize('update', $session);
 
@@ -69,19 +63,19 @@ class SessionController extends Controller
      *
      * @todo   check if the given card is associated with the given box.
      * @param  \Illuminate\Http\Request  $request
+     * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function review(Request $request)
+    public function review(Request $request, $boxID)
     {
         $validatedInput = $this->validate($request, [
-            'box_id'    => 'required|numeric',
             'card_id'   => 'required|numeric',
             'remember'  => 'required|boolean'
         ]);
 
         $user = $request->user();
         
-        $session = $user->getSessionByBoxID($validatedInput['box_id']);
+        $session = $user->getSessionByBoxID($boxID);
 
         $this->authorize('update', $session);
 
