@@ -43,10 +43,10 @@ class AuthServiceProvider extends ServiceProvider
                     return null;
                 }
                 
-                $key = env('APP_KEY');
+                $key = config('app.key');
 
                 try {
-                    $payload = JWT::decode($jwt, $key, array('HS256'));
+                    $payload = JWT::decode($jwt, $key, ['HS256']);
                 } catch (ExpiredException $e) {
                     abort(401, $e->getMessage());
                 } catch (Exception $e) {

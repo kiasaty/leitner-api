@@ -72,20 +72,26 @@ class AuthController extends Controller
     /**
      * Generates the Json Web Token (JWT).
      *
+     * @todo get TOKEN_LIFE_TIME form config.
+     *
      * @param  \App\User  $user
      * @return string  jwt token
      */
     private function generateJWT($user)
     {
         // The application key is being used as secret key
-        $key = env('APP_KEY');
+        $key = config('app.key');
+
+        $tokenIssueTime = time();
+
+        $tokenExpirationTime = $tokenIssueTime + env('TOKEN_LIFE_TIME');
 
         $payload = [
             // Reserved claims:
-            'iss' => "leitner",             // Issuer of the token
-            'sub' => $user->id,             // Subject of the token
-            'iat' => time(),                // Time when JWT was issued. 
-            'exp' => time() + 60 * 60 * 12, // Expiration time (12 hours)
+            'iss' => config('app.name'),    // Issuer of the token.
+            'sub' => $user->id,             // Subject of the token.
+            'iat' => $tokenIssueTime,       // Time when JWT was issued.
+            'exp' => $tokenExpirationTime,  // JWT Expiration time.
 
             // Private claims:
         ];
