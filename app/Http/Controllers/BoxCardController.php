@@ -40,7 +40,7 @@ class BoxCardController extends Controller
 
     /**
      * Create a card
-     * 
+     *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $boxID
      * @return \Illuminate\Http\Response
@@ -117,7 +117,7 @@ class BoxCardController extends Controller
 
     /**
      * Validates card's input
-     * 
+     *
      * @param  \Illuminate\Http\Request  $request
      * @return Array  validated input
      */
@@ -125,11 +125,11 @@ class BoxCardController extends Controller
     {
         $rules = [
             'front' => ['required', 'string',' min:2', 'max:250'],
-            'back'  => ['required', 'string', 'min:2', 'max:2000']
+            'back'  => ['required', 'string', 'min:2']
         ];
 
         if ($request->isMethod('put')) {
-            foreach($rules as $key => $value) {
+            foreach ($rules as $key => $value) {
                 if ($rules[$key][0] === 'required') {
                     $rules[$key][0] = 'sometimes';
                 }
