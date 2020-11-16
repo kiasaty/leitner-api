@@ -2,7 +2,6 @@
 
 namespace App;
 
-use Carbon\Carbon;
 use App\Usecases\CardReviewer;
 use App\Usecases\SessionStarter;
 use Illuminate\Database\Eloquent\Model;
@@ -42,6 +41,16 @@ class Session extends Model
     private function getDecks()
     {
         return preg_grep("/(Current|{$this->number})/i", self::DECKS);
+    }
+
+    /**
+     * Get the deck id corresponding to the current session.
+     *
+     * @return string
+     */
+    private function getCurrentDeck()
+    {
+        return array_keys(preg_grep("/^{$this->number}/i", self::DECKS))[0];
     }
 
     /**
@@ -97,7 +106,7 @@ class Session extends Model
     public function end()
     {
         $this->update([
-            'ended_at' => Carbon::now()
+            'ended_at' => $this->freshTimestamp()
         ]);
     }
 
@@ -148,7 +157,7 @@ class Session extends Model
      * Move the card one level forward.
      *
      * @param \App\Card $card
-     * @return bool
+     * @return void
      */
     public function promoteCard($card)
     {
@@ -166,43 +175,25 @@ class Session extends Model
             $data['deck_id'] = 12;
         }
 
-        $data['reviewed_at'] = Carbon::now();
+        $data['reviewed_at'] = $this->freshTimestamp();
 
-        return $this->user->cards()->updateExistingPivot(
-            $card->id,
-            $data
-        );
+        $this->updateCard($card->id, $data);
     }
 
     /**
      * Turn back the card to level 1.
      *
      * @param \App\Card $card
-     * @return bool
+     * @return void
      */
     public function demoteCard($card)
     {
-        $data = [
+        $this->updateCard($card->id, [
             'level'         => 1,
             'deck_id'       => 1,
             'difficulty'    => $card->progress->difficulty + 1,
-            'reviewed_at'   => Carbon::now()
-        ];
-
-        return $this->user->cards()->updateExistingPivot(
-            $card->id,
-            $data
-        );
-    }
-
-    /**
-     * Get the deck id corresponding to the current session.
-     *
-     * @return string
-     */
-    private function getCurrentDeck()
-    {
-        return array_keys(preg_grep("/^{$this->number}/i", self::DECKS))[0];
+            'reviewed_at'   => $this->freshTimestamp()
+        ]);
     }
 
     /**
@@ -261,5 +252,17 @@ class Session extends Model
         return $this->relationLoaded('cards') ?
             $this->cards->where('id', $cardID)->exists() :
             $this->cards()->where('id', $cardID)->exists();
+    }
+
+    /**
+     * Update the card progress information in the session.
+     *
+     * @param  int  $cardID
+     * @param  array  $attributes
+     * @return void
+     */
+    public function updateCard($cardID, $attributes)
+    {
+        $this->cards()->updateExistingPivot($cardID, $attributes);
     }
 }
