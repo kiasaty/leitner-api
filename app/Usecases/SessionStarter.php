@@ -118,8 +118,7 @@ class SessionStarter
      */
     private function areThereAnyCardsInSessionToLearn()
     {
-        return $this->session->user->cards()
-            ->where('box_id', $this->session->box_id)
+        return $this->session->cards
             ->where('level', '<>', 5)
             ->exists();
     }
@@ -131,9 +130,7 @@ class SessionStarter
      */
     private function areThereAnyNewCardsInBoxToLearn()
     {
-        $sessionCardsIDs = $this->session->user->cards()
-            ->where('box_id', $this->session->box_id)
-            ->pluck('id');
+        $sessionCardsIDs = $this->session->cards->pluck('id');
             
         return $this->session->box->cards()
             ->whereNotIn('id', $sessionCardsIDs)
@@ -147,16 +144,14 @@ class SessionStarter
      */
     private function addNewCardsToSession()
     {
-        $reviewingCardsIDs = $this->session->user->cards()
-            ->where('box_id', $this->session->box_id)
-            ->pluck('id');
+        $reviewingCardsIDs = $this->session->cards->pluck('id');
             
         $cardsIDs = $this->session->box->cards()
             ->whereNotIn('id', $reviewingCardsIDs)
             ->take($this->maxNewCardsToBeAdded)
             ->pluck('id');
 
-        $this->session->user->cards()->attach($cardsIDs);
+        $this->session->cards()->attach($cardsIDs);
 
         return $this;
     }

@@ -71,6 +71,16 @@ class Session extends Model
     }
 
     /**
+     * The cards associated with the session.
+     */
+    public function cards()
+    {
+        return $this->belongsToMany('App\Card', 'card_user')
+            ->as('progress')
+            ->withPivot(['user_id', 'level', 'deck_id', 'difficulty', 'reviewed_at']);
+    }
+
+    /**
      * Start a new learning session.
      *
      * @todo Refactor this.
@@ -98,8 +108,7 @@ class Session extends Model
      */
     public function getNextCard()
     {
-        return $this->user->cards()
-            ->where('box_id', $this->box_id)
+        return $this->cards()
             ->whereIn('deck_id', $this->decks_ids)
             ->where(function ($query) {
                 $query->whereNull('reviewed_at')
@@ -227,28 +236,30 @@ class Session extends Model
     }
 
     /**
-     * @todo if a cardID which is not for the session is passed, and the user has the card in another session, the card will be returned.
-     *        a session_id in needed in the card_user table.
-     * @todo refactor this after adding session_id in card_user table.
+     * Get a card that is present in the session.
      *
      * @param  int  $cardID
      * @return \App\Card
      */
     public function getCard($cardID)
     {
-        return $this->user->getCard($cardID);
+        return $this->relationLoaded('cards') ?
+            $this->cards->find($cardID) :
+            $this->cards()->find($cardID);
     }
 
     /**
-     * Check if the card is present in the session.
+     * Check if a card is present in the session.
      *
-     * @todo refactor this after adding session_id in card_user table.
-     *
-     * @param  \App\Card  $card
+     * @param  \App\Card|\ArrayAccess|array|int  $card
      * @return bool
      */
     public function hasCard($card)
     {
-        return (bool) $this->getCard($card->id);
+        $cardID = is_int($card) ? $card : $card['id'];
+
+        return $this->relationLoaded('cards') ?
+            $this->cards->where('id', $cardID)->exists() :
+            $this->cards()->where('id', $cardID)->exists();
     }
 }
