@@ -40,14 +40,4 @@ class Card extends Model
     {
         return $this->belongsTo('App\Box');
     }
-
-    /**
-     * The users that are using the card.
-     */
-    public function users()
-    {
-        return $this->belongsToMany('App\User')
-            ->as('progress')
-            ->withPivot(['session_id', 'level', 'deck_id', 'difficulty', 'reviewed_at']);
-    }
 }

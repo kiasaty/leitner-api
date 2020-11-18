@@ -84,9 +84,9 @@ class Session extends Model
      */
     public function cards()
     {
-        return $this->belongsToMany('App\Card', 'card_user')
+        return $this->belongsToMany('App\Card', 'session_card')
             ->as('progress')
-            ->withPivot(['user_id', 'level', 'deck_id', 'difficulty', 'reviewed_at']);
+            ->withPivot(['level', 'deck_id', 'difficulty', 'reviewed_at']);
     }
 
     /**

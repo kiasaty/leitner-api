@@ -15,7 +15,7 @@ class AddSessionIdColumnToCardUserTable extends Migration
     public function up()
     {
         Schema::table('card_user', function (Blueprint $table) {
-            $table->unsignedInteger('session_id')->after('card_id')->nullable();
+            $table->unsignedInteger('session_id')->after('user_id')->nullable();
 
             $table->foreign('session_id')->references('id')->on('sessions')->onDelete('cascade');
         });
@@ -49,8 +49,6 @@ class AddSessionIdColumnToCardUserTable extends Migration
      */
     public function down()
     {
-        Schema::table('card_user', function (Blueprint $table) {
-            $table->dropColumn('session_id');
-        });
+        //
     }
 }

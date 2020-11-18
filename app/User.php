@@ -59,16 +59,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     /**
-     * The cards that this user is using.
-     */
-    public function cards()
-    {
-        return $this->belongsToMany('App\Card')
-            ->as('progress')
-            ->withPivot(['session_id', 'level', 'deck_id', 'difficulty', 'reviewed_at']);
-    }
-
-    /**
      * The learning sessions associated with the user.
      */
     public function sessions()
