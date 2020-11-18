@@ -82,6 +82,10 @@ class SessionStarter
      */
     private function checkIfBreakTimeIsOver()
     {
+        if (! $this->session->isCompleted()) {
+            return $this;
+        }
+        
         $sessionEndTime = Carbon::parse($this->session->ended_at);
 
         if ($sessionEndTime->diffInMinutes() < $this->breakTimeBetweenSessions) {
@@ -118,9 +122,9 @@ class SessionStarter
      */
     private function areThereAnyCardsInSessionToLearn()
     {
-        return $this->session->cards
+        return (bool) $this->session->cards
             ->where('level', '<>', 5)
-            ->exists();
+            ->count();
     }
 
     /**

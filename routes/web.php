@@ -46,7 +46,7 @@ $router->group(['prefix' => 'boxes/{box_id}/cards'], function () use ($router) {
     $router->delete('/{id}', 'BoxCardController@destroy');
 });
 
-$router->group(['prefix' => 'boxes/{box_id}/session'], function () use ($router) {
+$router->group(['prefix' => 'boxes/{boxID}/session'], function () use ($router) {
     $router->post('/start', 'SessionController@start');
     $router->get('/next', 'SessionController@next');
     $router->post('/review', 'SessionController@review');

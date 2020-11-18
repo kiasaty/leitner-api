@@ -74,7 +74,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public function getSessionByBoxID($boxID)
     {
-        return $this->sessions()->where('box_id', $boxID)->firstOrFail();
+        return $this->sessions()->firstOrCreate(['box_id' => $boxID]);
     }
     
     /**
