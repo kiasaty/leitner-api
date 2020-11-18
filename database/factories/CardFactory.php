@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Box;
 use App\Card;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -22,8 +23,9 @@ class CardFactory extends Factory
     public function definition()
     {
         return [
-            'front' => $this->faker->word,
-            'back'  => $this->faker->sentence,
+            'box_id'    => Box::factory(),
+            'front'     => $this->faker->word,
+            'back'      => $this->faker->sentence,
         ];
     }
 }

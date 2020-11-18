@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Box;
+use App\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BoxFactory extends Factory
@@ -22,6 +23,7 @@ class BoxFactory extends Factory
     public function definition()
     {
         return [
+            'creator_id'    => User::factory(),
             'title'         => $this->faker->word,
             'description'   => $this->faker->sentence,
         ];
