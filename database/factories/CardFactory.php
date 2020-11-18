@@ -1,13 +1,29 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
 use App\Card;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(Card::class, function (Faker $faker) {
-    return [
-        'front' => $faker->word,
-        'back'  => $faker->sentence,
-    ];
-});
+class CardFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Card::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'front' => $this->faker->word,
+            'back'  => $this->faker->sentence,
+        ];
+    }
+}

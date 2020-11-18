@@ -1,13 +1,29 @@
 <?php
 
-/** @var \Illuminate\Database\Eloquent\Factory $factory */
+namespace Database\Factories;
 
 use App\Box;
-use Faker\Generator as Faker;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(Box::class, function (Faker $faker) {
-    return [
-        'title'         => $faker->word,
-        'description'   => $faker->sentence,
-    ];
-});
+class BoxFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Box::class;
+
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition()
+    {
+        return [
+            'title'         => $this->faker->word,
+            'description'   => $this->faker->sentence,
+        ];
+    }
+}
