@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Box;
+use App\Card;
 use Tests\TestCase;
 
 class StartSessionTest extends TestCase
@@ -75,7 +76,23 @@ class StartSessionTest extends TestCase
     /** @test */
     public function new_session_can_be_started_when_there_are_still_none_retired_cards_in_session()
     {
-        //
+        $box = Box::factory()->hasCards(5)->create();
+
+        $session = $box->getSession($box->creator_id);
+
+        $session->addCards(
+            $box->cards->pluck('id'),
+            ['level' => 5, 'deck_id' => 12]
+        );
+
+        $session->addCards(
+            Card::factory()->count(5)->create(['box_id' => $session->box_id])->pluck('id')
+        );
+
+        $this->loginUser($box->creator);
+
+        $this->post("boxes/{$box->id}/session/start")
+            ->seeStatusCode(200);
     }
 
     /** @test */

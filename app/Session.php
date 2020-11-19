@@ -229,12 +229,16 @@ class Session extends Model
     /**
      * Add cards to the session from the box.
      *
+     * @todo this method filters the cards to make sure the cards are in the session's box. is this something that this method should do?
+     *
      * @param  mixed  $cardsIDs
      * @param  array  $attributes
      * @return void
      */
     public function addCards($cardsIDs, $attributes = [])
     {
+        $cardsIDs = Card::where('box_id', $this->box_id)->whereIn('id', $cardsIDs)->pluck('id');
+        
         $this->cards()->attach($cardsIDs, $attributes);
     }
 
