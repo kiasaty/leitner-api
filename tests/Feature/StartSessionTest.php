@@ -26,6 +26,10 @@ class StartSessionTest extends TestCase
         
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(200);
+        
+        $session = $box->getSession($box->creator_id);
+            
+        $this->assertTrue($session->isRunning());
     }
 
     /** @test */
@@ -33,10 +37,14 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $this->loginUser();
+        $user = $this->loginUser();
 
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(200);
+        
+        $session = $box->getSession($user->id);
+                
+        $this->assertTrue($session->isRunning());
     }
 
     /** @test */
@@ -48,6 +56,10 @@ class StartSessionTest extends TestCase
 
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(422);
+        
+        $session = $box->getSession($box->creator_id);
+                    
+        $this->assertFalse($session->isRunning());
     }
 
     public function new_session_can_not_be_started_when_the_previous_session_is_not_completed()
@@ -71,6 +83,10 @@ class StartSessionTest extends TestCase
 
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(422);
+        
+        $session->refresh();
+                        
+        $this->assertFalse($session->isRunning());
     }
 
     /** @test */
@@ -93,6 +109,10 @@ class StartSessionTest extends TestCase
 
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(200);
+                         
+        $session->refresh();
+            
+        $this->assertTrue($session->isRunning());
     }
 
     /** @test */
@@ -111,5 +131,9 @@ class StartSessionTest extends TestCase
 
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(200);
+                         
+        $session->refresh();
+                
+        $this->assertTrue($session->isRunning());
     }
 }
