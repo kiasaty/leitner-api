@@ -59,7 +59,7 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $session = $box->creator->getSessionByBoxID($box->id);
+        $session = $box->getSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id'),
@@ -83,7 +83,7 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $session = $box->creator->getSessionByBoxID($box->id);
+        $session = $box->getSession($box->creator_id);
 
         $session->addCards(
             $box->cards->take(3)->pluck('id'),

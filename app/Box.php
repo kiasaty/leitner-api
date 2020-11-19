@@ -49,4 +49,15 @@ class Box extends Model
     {
         return $this->hasMany('App\Session');
     }
+
+    /**
+     * Get a session associated with the box for a user.
+     *
+     * @param  int  $userID
+     * @return \App\Session
+     */
+    public function getSession($userID)
+    {
+        return $this->sessions()->firstOrCreate(['user_id' => $userID]);
+    }
 }

@@ -70,9 +70,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      * Get the user's session by boxID.
      *
      * @param  int  $boxID
-     * @return \App\Box
+     * @return \App\Session
      */
-    public function getSessionByBoxID($boxID)
+    public function getSession($boxID)
     {
         return $this->sessions()->firstOrCreate(['box_id' => $boxID]);
     }

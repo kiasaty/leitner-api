@@ -21,7 +21,7 @@ class SessionController extends Controller
      */
     public function start(Request $request, $boxID)
     {
-        $session = $request->user()->getSessionByBoxID($boxID);
+        $session = $request->user()->getSession($boxID);
 
         $this->authorize('update', $session);
 
@@ -41,7 +41,7 @@ class SessionController extends Controller
      */
     public function next(Request $request, $boxID)
     {
-        $session = $request->user()->getSessionByBoxID($boxID);
+        $session = $request->user()->getSession($boxID);
 
         $this->authorize('update', $session);
 
@@ -72,7 +72,7 @@ class SessionController extends Controller
             'remember'  => 'required|boolean'
         ]);
 
-        $session = $request->user()->getSessionByBoxID($boxID);
+        $session = $request->user()->getSession($boxID);
 
         $this->authorize('update', $session);
 
