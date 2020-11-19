@@ -227,6 +227,18 @@ class Session extends Model
     }
 
     /**
+     * Add cards to the session from the box.
+     *
+     * @param  mixed  $cardsIDs
+     * @param  array  $attributes
+     * @return void
+     */
+    public function addCards($cardsIDs, $attributes = [])
+    {
+        $this->cards()->attach($cardsIDs, $attributes);
+    }
+
+    /**
      * Get a card that is present in the session.
      *
      * @param  int  $cardID

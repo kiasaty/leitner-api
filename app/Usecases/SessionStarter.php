@@ -123,7 +123,7 @@ class SessionStarter
     private function areThereAnyCardsInSessionToLearn()
     {
         return (bool) $this->session->cards
-            ->where('level', '<>', 5)
+            ->where('progress.level', '<>', 5)
             ->count();
     }
 
@@ -155,7 +155,7 @@ class SessionStarter
             ->take($this->maxNewCardsToBeAdded)
             ->pluck('id');
 
-        $this->session->cards()->attach($cardsIDs);
+        $this->session->addCards($cardsIDs);
 
         return $this;
     }
