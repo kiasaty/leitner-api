@@ -62,11 +62,6 @@ class StartSessionTest extends TestCase
         $this->assertFalse($session->isRunning());
     }
 
-    public function new_session_can_not_be_started_when_the_previous_session_is_not_completed()
-    {
-        //
-    }
-
     /** @test */
     public function new_session_can_not_be_started_when_all_cards_in_box_are_studied()
     {
@@ -135,5 +130,43 @@ class StartSessionTest extends TestCase
         $session->refresh();
                 
         $this->assertTrue($session->isRunning());
+    }
+
+    public function new_session_can_be_started_only_when_the_previous_session_is_completed()
+    {
+        //
+    }
+
+    /** @test */
+    public function new_session_can_be_started_only_when_the_break_time_is_over()
+    {
+        $box = Box::factory()->hasCards(5)->create();
+
+        $session = $box->getSession($box->creator_id);
+
+        $session->addCards(
+            $box->cards->take(3)->pluck('id'),
+            ['level' => 5, 'deck_id' => 12]
+        );
+
+        $session->complete();
+
+        $this->loginUser($box->creator);
+
+        $this->post("boxes/{$box->id}/session/start")
+            ->seeStatusCode(422);
+
+        $session->refresh();
+
+        $this->assertFalse($session->isRunning());
+        
+        // $breakTimeBetweenSessions = config('session.gap_time');
+
+        // $this->travel($breakTimeBetweenSessions + 1)->minutes();
+
+        // $this->post("boxes/{$box->id}/session/start")
+        //     ->seeStatusCode(200);
+
+        // $this->assertTrue($session->isRunning());
     }
 }
