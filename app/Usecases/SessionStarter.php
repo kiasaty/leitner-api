@@ -74,7 +74,7 @@ class SessionStarter
     /**
      * Check if the break time between session is over.
      *
-     * @todo make sure ended_at is not carbon instance.
+     * @todo make sure completed_at is not carbon instance.
      *
      * @return $this
      *
@@ -86,7 +86,7 @@ class SessionStarter
             return $this;
         }
         
-        $sessionEndTime = Carbon::parse($this->session->ended_at);
+        $sessionEndTime = Carbon::parse($this->session->completed_at);
 
         if ($sessionEndTime->diffInMinutes() < $this->breakTimeBetweenSessions) {
             $diffForHumans = $sessionEndTime->addMinutes($this->breakTimeBetweenSessions)->diffForHumans(['parts' => 3]);
@@ -170,7 +170,7 @@ class SessionStarter
         $this->session->update([
             'number'        => $this->getNextSessionNumber(),
             'started_at'    => Carbon::now(),
-            'ended_at'      => null
+            'completed_at'  => null
         ]);
 
         return $this;

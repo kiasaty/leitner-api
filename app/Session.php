@@ -101,12 +101,17 @@ class Session extends Model
     }
 
     /**
+     * Make the session complete.
      *
+     * @todo check if the session can be completed. maybe a SessionCompleter Usecase class is needed.
+     *      The session can be complete when all the cards in the current deck are reviewed.
+     *
+     * @return void
      */
-    public function end()
+    public function complete()
     {
         $this->update([
-            'ended_at' => $this->freshTimestamp()
+            'completed_at' => $this->freshTimestamp()
         ]);
     }
 
@@ -213,7 +218,7 @@ class Session extends Model
      */
     public function isCompleted()
     {
-        return (bool) $this->ended_at;
+        return (bool) $this->completed_at;
     }
 
     /**

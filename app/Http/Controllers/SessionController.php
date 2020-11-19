@@ -84,7 +84,7 @@ class SessionController extends Controller
         if ($nextCard = $session->getNextCard()) {
             return new CardResource($nextCard);
         } else {
-            $session->end();
+            $session->complete();
         }
     }
 }
