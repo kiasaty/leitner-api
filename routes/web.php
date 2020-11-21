@@ -48,6 +48,6 @@ $router->group(['prefix' => 'boxes/{box_id}/cards'], function () use ($router) {
 
 $router->group(['prefix' => 'boxes/{boxID}/session'], function () use ($router) {
     $router->post('/start', 'SessionController@start');
-    $router->get('/next', 'SessionController@next');
-    $router->post('/review', 'SessionController@review');
+    $router->get('/cards/next', 'SessionController@next');
+    $router->post('/cards/{cardID}/review', 'SessionController@review');
 });

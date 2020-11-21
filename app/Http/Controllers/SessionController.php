@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Box;
 use Illuminate\Http\Request;
 use App\Http\Resources\CardResource;
 
@@ -63,23 +64,24 @@ class SessionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $boxID
+     * @param  int  $cardID
      * @return \Illuminate\Http\Response
      */
-    public function review(Request $request, $boxID)
+    public function review(Request $request, $boxID, $cardID)
     {
         $validatedInput = $this->validate($request, [
-            'card_id'   => 'required|numeric',
             'remember'  => 'required|boolean'
         ]);
 
+        $box = Box::findOrFail($boxID);
+
         $session = $request->user()->getSession($boxID);
+
+        $card = $session->cards()->findOrFail($cardID);
 
         $this->authorize('update', $session);
 
-        $session->review(
-            $validatedInput['card_id'],
-            $validatedInput['remember']
-        );
+        $session->review($cardID, $validatedInput['remember']);
 
         if ($nextCard = $session->getNextCard()) {
             return new CardResource($nextCard);
