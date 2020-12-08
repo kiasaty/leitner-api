@@ -93,11 +93,17 @@ class Session extends Model
      * Start a new learning session.
      *
      * @todo Refactor this.
-     * @return bool
+     * @return void
      */
     public function start()
     {
-        return (new SessionStarter($this))->start();
+        $nextSessionNumber = is_null($this->started_at) || $this->number == 9 ? 0 : $this->number + 1;
+
+        $this->update([
+            'number'        => $nextSessionNumber,
+            'started_at'    => $this->freshTimestamp(),
+            'completed_at'  => null
+        ]);
     }
 
     /**
@@ -229,6 +235,18 @@ class Session extends Model
     public function isRunning()
     {
         return $this->isStarted() && !$this->isCompleted();
+    }
+
+    public function fetchNewCardsFromBox($maxNewCardsToBeAdded)
+    {
+        $reviewingCardsIDs = $this->cards->pluck('id');
+            
+        $cardsIDs = $this->box->cards()
+            ->whereNotIn('id', $reviewingCardsIDs)
+            ->take($maxNewCardsToBeAdded)
+            ->pluck('id');
+
+        $this->addCards($cardsIDs);
     }
 
     /**

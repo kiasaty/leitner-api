@@ -27,10 +27,8 @@ class SessionStarter
      * @param  \App\Session
      * @return void
      */
-    public function __construct(Session $session)
+    public function __construct()
     {
-        $this->session = $session;
-
         $this->breakTimeBetweenSessions = config('session.gap_time');
 
         $this->maxNewCardsToBeAdded = config('session.default_max_new_cards');
@@ -43,15 +41,17 @@ class SessionStarter
      *
      * @throws \Illuminate\Validation\ValidationException
      */
-    public function start()
+    public function start(Session $session)
     {
+        $this->session = $session;
+        
         $this->checkIfLastSessionIsCompleted()
             ->checkIfBreakTimeIsOver()
             ->checkIfThereAreCardsToLearn();
 
         DB::transaction(function () {
-            $this->addNewCardsToSession()
-                ->startNextSession();
+            $this->session->fetchNewCardsFromBox($this->maxNewCardsToBeAdded);
+            $this->session->start();
         });
     }
 
@@ -74,8 +74,6 @@ class SessionStarter
     /**
      * Check if the break time between session is over.
      *
-     * @todo make sure completed_at is not carbon instance.
-     *
      * @return $this
      *
      * @throws \Illuminate\Validation\ValidationException
@@ -85,7 +83,7 @@ class SessionStarter
         if (! $this->session->isCompleted()) {
             return $this;
         }
-        
+
         $sessionEndTime = Carbon::parse($this->session->completed_at);
 
         if ($sessionEndTime->diffInMinutes() < $this->breakTimeBetweenSessions) {
@@ -139,52 +137,5 @@ class SessionStarter
         return $this->session->box->cards()
             ->whereNotIn('id', $sessionCardsIDs)
             ->exists();
-    }
-
-    /**
-     * Add new cards to the session.
-     *
-     * @return $this
-     */
-    private function addNewCardsToSession()
-    {
-        $reviewingCardsIDs = $this->session->cards->pluck('id');
-            
-        $cardsIDs = $this->session->box->cards()
-            ->whereNotIn('id', $reviewingCardsIDs)
-            ->take($this->maxNewCardsToBeAdded)
-            ->pluck('id');
-
-        $this->session->addCards($cardsIDs);
-
-        return $this;
-    }
-
-    /**
-     * Start next session.
-     *
-     * @return $this
-     */
-    private function startNextSession()
-    {
-        $this->session->update([
-            'number'        => $this->getNextSessionNumber(),
-            'started_at'    => Carbon::now(),
-            'completed_at'  => null
-        ]);
-
-        return $this;
-    }
-
-    /**
-     * Get the next session number.
-     *
-     * @return int
-     */
-    private function getNextSessionNumber()
-    {
-        return is_null($this->session->started_at) || $this->session->number == 9 ?
-            0 :
-            $this->session->number + 1;
     }
 }

@@ -13,6 +13,8 @@ class BoxTest extends TestCase
     {
         $box = Box::factory()->create();
         
+        $box->createSession($box->creator_id);
+
         $session = $box->getSession($box->creator_id);
 
         $this->assertEquals($session->user_id, $box->creator_id);
@@ -20,6 +22,8 @@ class BoxTest extends TestCase
 
         $userWhoIsNotCreatorOfBox = User::factory()->create();
         
+        $box->createSession($userWhoIsNotCreatorOfBox->id);
+
         $session = $box->getSession($userWhoIsNotCreatorOfBox->id);
 
         $this->assertEquals($session->user_id, $userWhoIsNotCreatorOfBox->id);

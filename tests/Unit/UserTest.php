@@ -17,13 +17,17 @@ class UserTest extends TestCase
             'creator_id' => $user->id
         ]);
         
-        $session = $user->getSession($box->id);
+        $user->createSession($box);
+
+        $session = $user->getSession($box);
 
         $this->assertEquals($session->user_id, $user->id);
         $this->assertEquals($session->box_id, $box->id);
 
         $userWhoIsNotCreatorOfBox = User::factory()->create();
         
+        $userWhoIsNotCreatorOfBox->createSession($box);
+
         $session = $userWhoIsNotCreatorOfBox->getSession($box->id);
 
         $this->assertEquals($session->user_id, $userWhoIsNotCreatorOfBox->id);
