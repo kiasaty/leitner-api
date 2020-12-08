@@ -142,14 +142,12 @@ class Session extends Model
     /**
      * Review a card in the session.
      *
-     * @param  int $cardID
+     * @param  \App\Card  $card
      * @param  int  $remember
      * @return void
      */
-    public function review($cardID, $remember)
+    public function review($card, $remember)
     {
-        $card = $this->getCard($cardID);
-
         (new CardReviewer($this, $card, $remember))->review();
     }
     
@@ -271,11 +269,9 @@ class Session extends Model
      * @param  int  $cardID
      * @return \App\Card
      */
-    public function getCard($cardID)
+    public function findCardOrFail($cardID)
     {
-        return $this->relationLoaded('cards') ?
-            $this->cards->find($cardID) :
-            $this->cards()->find($cardID);
+        return $this->cards()->findOrFail($cardID);
     }
 
     /**

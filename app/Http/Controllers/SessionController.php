@@ -74,15 +74,13 @@ class SessionController extends Controller
             'remember'  => 'required|boolean'
         ]);
 
-        $box = Box::findOrFail($boxID);
-
         $session = $request->user()->getSession($boxID);
-
-        $card = $session->cards()->findOrFail($cardID);
 
         $this->authorize('update', $session);
 
-        $session->review($cardID, $validatedInput['remember']);
+        $card = $session->findCardOrFail($cardID);
+
+        $session->review($card, $validatedInput['remember']);
 
         if ($nextCard = $session->getNextCard()) {
             return new CardResource($nextCard);

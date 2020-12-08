@@ -91,15 +91,4 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
 
         return $this->sessions()->where('box_id', $boxID)->firstOrFail();
     }
-    
-    /**
-     * Get the user's card.
-     *
-     * @param  int  $cardID
-     * @return \App\Card
-     */
-    public function getCard($cardID)
-    {
-        return $this->cards()->findOrFail($cardID);
-    }
 }
