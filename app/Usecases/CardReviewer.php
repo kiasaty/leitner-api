@@ -34,7 +34,8 @@ class CardReviewer
     
     public function review()
     {
-        $this->checkIfSessionIsRunning()
+        $this->checkIfTheCardIsInSessionBox()
+            ->checkIfSessionIsRunning()
             ->checkIfCardIsInSession()
             ->checkIfCardHasBeenReviewed();
 
@@ -43,6 +44,15 @@ class CardReviewer
         } else {
             $this->session->demoteCard($this->card);
         }
+    }
+
+    public function checkIfTheCardIsInSessionBox()
+    {
+        if ($this->session->box_id != $this->card->box_id) {
+            abort(422, 'The card does not exist in the session box.');
+        }
+
+        return $this;
     }
 
     /**
