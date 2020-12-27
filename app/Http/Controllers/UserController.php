@@ -42,8 +42,8 @@ class UserController extends Controller
 
         $validatedInput['password'] = app('hash')->make($validatedInput['password']);
 
-        if ($request->has('profile_photo')) {
-            $validatedInput['profile_photo'] = $this->saveProfilePhoto($request);
+        if ($request->has('avatar')) {
+            $validatedInput['avatar'] = $this->saveProfilePhoto($request);
         }
 
         $user = User::create($validatedInput);
@@ -86,8 +86,8 @@ class UserController extends Controller
             $validatedInput['password'] = app('hash')->make($validatedInput['password']);
         }
 
-        if ($request->has('profile_photo')) {
-            $validatedInput['profile_photo'] = $this->saveProfilePhoto($request);
+        if ($request->has('avatar')) {
+            $validatedInput['avatar'] = $this->saveProfilePhoto($request);
         }
 
         $user->update($validatedInput);
@@ -123,7 +123,7 @@ class UserController extends Controller
      */
     public function saveProfilePhoto(Request $request)
     {
-        $image = $request['profile_photo'];
+        $image = $request['avatar'];
 
         $imageFileExtention =   $image->guessExtension()        ?? 
                                 $image->guessClientExtension()  ?? 
@@ -156,7 +156,7 @@ class UserController extends Controller
             'email'         => ['required', 'email', 'unique:users'],
             'username'      => ['required', 'string', 'unique:users', 'min:3', 'regex:/^\S*$/'],
             'password'      => ['required', 'min:4', 'confirmed'],
-            'profile_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:5120']
+            'avatar' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:5120']
         ];
 
         if ($request->isMethod('put')) {
