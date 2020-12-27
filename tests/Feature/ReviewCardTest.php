@@ -3,6 +3,8 @@
 namespace Tests\Feature;
 
 use App\Box;
+use App\Card;
+use Carbon\Carbon;
 use Tests\TestCase;
 
 class ReviewCardTest extends TestCase
@@ -24,15 +26,34 @@ class ReviewCardTest extends TestCase
         $this->post("boxes/1000/session/cards/1/review", ['remember' => true])
             ->seeStatusCode(404);
     }
+
+    /** @test */
+    public function card_can_not_be_reviewed_if_user_has_no_session_on_the_given_box()
+    {
+        $box = Box::factory()->hasCards(1)->create();
+        $session = $box->createSession($box->creator);
+        $session->addCards($box->cards->pluck('id'));
+
+        $cardToReview = $session->cards()->first();
+
+        $this->loginUser();
+
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+            ->seeStatusCode(404);
+    }
     
     /** @test */
     public function card_can_not_be_reviewed_if_card_does_not_exist_in_box()
     {
-        $box = Box::factory()->create();
+        $box = Box::factory()->hasCards(1)->create();
+        $session = $box->createSession($box->creator);
+        $session->addCards($box->cards->pluck('id'));
 
-        $this->loginUser();
+        $card = Card::factory()->create();
 
-        $this->post("boxes/{$box->id}/session/cards/1000/review", ['remember' => true])
+        $this->loginUser($box->creator);
+
+        $this->post("boxes/{$box->id}/session/cards/{$card->id}/review", ['remember' => true])
             ->seeStatusCode(404);
     }
 
@@ -40,12 +61,14 @@ class ReviewCardTest extends TestCase
     public function card_can_not_be_reviewed_if_card_does_not_belong_to_the_given_box()
     {
         $box = Box::factory()->hasCards(1)->create();
+        $session = $box->createSession($box->creator);
+        $session->addCards($box->cards->pluck('id'));
 
         $anotherBox = Box::factory()->hasCards(1)->create();
 
-        $this->loginUser();
+        $this->loginUser($box->creator);
         
-        $this->post("boxes/{$anotherBox->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$anotherBox->cards->first()->id}/review", ['remember' => true])
             ->seeStatusCode(404);
     }
     
@@ -61,18 +84,8 @@ class ReviewCardTest extends TestCase
         $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
             ->seeStatusCode(404);
     }
-
-    /** @test */
-    public function card_can_not_be_reviewed_if_user_has_no_session_on_the_given_box()
-    {
-        $box = Box::factory()->hasCards(1)->create();
-
-        $this->loginUser();
-
-        $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
-            ->seeStatusCode(404);
-    }
     
+    /** @test */
     public function card_can_not_be_reviewed_if_session_is_not_in_running_state()
     {
         $box = Box::factory()->hasCards(3)->create();
@@ -94,6 +107,7 @@ class ReviewCardTest extends TestCase
             ->seeStatusCode(422);
     }
     
+    /** @test */
     public function card_can_not_be_reviewed_if_card_is_retired()
     {
         $box = Box::factory()->hasCards(1)->create();
@@ -102,17 +116,30 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
+        // here you should travel in time to the future.
+        
         $session->addCards(
             $box->cards->pluck('id'),
-            ['level' => 5, 'deck_id' => 12]
+            ['level' => 5, 'deck_id' => 12, 'reviewed_at' => Carbon::now()->subMinute()]
         );
 
+        $cardToReview = $session->cards->first();
+        
         $this->loginUser($box->creator);
 
-        $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->seeStatusCode(422);
+
+        $previousReviewedAt = $cardToReview->progress->reviewed_at;
+        $cardToReview->progress->refresh();
+            
+        $this->assertEquals($cardToReview->progress->level, 5);
+        $this->assertEquals($cardToReview->progress->deck_id, 12);
+        $this->assertEquals($previousReviewedAt, $cardToReview->progress->reviewed_at);
+        
     }
     
+    /** @test */
     public function card_can_be_reviewed_only_if_card_deck_is_in_current_session_decks()
     {
         $box = Box::factory()->hasCards(1)->create();
@@ -137,11 +164,12 @@ class ReviewCardTest extends TestCase
             ->seeStatusCode(422);
     }
 
-    public function card_can_be_reviewed_if_it_has_not_been_reviewed_in_current_session_yet()
+    /** @test */
+    public function card_can_not_be_reviewed_if_it_has_been_reviewed_in_current_session()
     {
         $box = Box::factory()->hasCards(3)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id')
@@ -149,26 +177,31 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
-        $cardToReview = $session->getNextCardToReview();
+        // go a little forward in time.
+
+        $cardToReview = $session->getNextCard();
         
         $session->promoteCard($cardToReview);
-            
-        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", $attributes)
+
+        $this->loginUser($box->creator);
+
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->seeStatusCode(422);
 
-        $cardToReview = $session->getNextCardToReview();
+        $cardToReview = $session->getNextCard();
         
         $session->demoteCard($cardToReview);
             
-        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", $attributes)
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->seeStatusCode(422);
     }
 
+    /** @test */
     public function a_card_will_be_promoted_if_user_remembers_it()
     {
         $box = Box::factory()->hasCards(1)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id')
@@ -176,22 +209,26 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
-        $cardToReview = $session->getNextCardToReview();
+        $cardToReview = $session->getNextCard();
 
+        $this->loginUser($box->creator);
+        
         $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->seeStatusCode(200);
         
-        $previousLevel = $cardToReview->level;
-        $cardToReview->refresh();
-        $newLevel = $cardToReview->level;
+        $previousLevel = $cardToReview->progress->level;
+        $cardToReview->progress->refresh();
+        $newLevel = $cardToReview->progress->level;
+
         $this->assertEquals($newLevel, $previousLevel + 1);
     }
 
+    /** @test */
     public function a_card_will_be_demoted_if_user_does_not_remember_it()
     {
         $box = Box::factory()->hasCards(1)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id'),
@@ -200,22 +237,25 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
-        $cardToReview = $session->getNextCardToReview();
+        $cardToReview = $session->getNextCard();
+
+        $this->loginUser($box->creator);
 
         $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => false])
             ->seeStatusCode(200);
         
-        $cardToReview->refresh();
+        $cardToReview->progress->refresh();
         
-        $this->assertEquals($cardToReview->level, 1);
-        $this->assertEquals($cardToReview->deck_id, 1);
+        $this->assertEquals($cardToReview->progress->level, 1);
+        $this->assertEquals($cardToReview->progress->deck_id, 1);
     }
 
+    /** @test */
     public function when_user_does_not_remember_a_card_the_difficulty_of_card_increases()
     {
         $box = Box::factory()->hasCards(1)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id'),
@@ -224,22 +264,25 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
-        $cardToReview = $session->getNextCardToReview();
+        $cardToReview = $session->getNextCard();
+
+        $this->loginUser($box->creator);
 
         $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => false])
             ->seeStatusCode(200);
 
-        $previousDifficulty = $cardToReview->difficulty;
-        $cardToReview->refresh();
+        $previousDifficulty = $cardToReview->progress->difficulty;
+        $cardToReview->progress->refresh();
         
-        $this->assertEquals($cardToReview->difficulty, $previousDifficulty + 1);
+        $this->assertEquals($cardToReview->progress->difficulty, $previousDifficulty + 1);
     }
 
+    /** @test */
     public function when_user_remembers_a_card_the_difficulty_of_card_does_not_change()
     {
         $box = Box::factory()->hasCards(1)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id'),
@@ -248,22 +291,25 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
-        $cardToReview = $session->getNextCardToReview();
+        $cardToReview = $session->getNextCard();
+
+        $this->loginUser($box->creator);
 
         $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->seeStatusCode(200);
 
-        $previousDifficulty = $cardToReview->difficulty;
-        $cardToReview->refresh();
+        $previousDifficulty = $cardToReview->progress->difficulty;
+        $cardToReview->progress->refresh();
         
-        $this->assertEquals($cardToReview->difficulty, $previousDifficulty);
+        $this->assertEquals($cardToReview->progress->difficulty, $previousDifficulty);
     }
 
+    /** @test */
     public function when_a_card_gets_promoted_for_the_first_time_it_gets_the_current_session_deck()
     {
         $box = Box::factory()->hasCards(1)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id')
@@ -271,37 +317,28 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
-        $cardToReview = $session->getNextCardToReview();
+        $cardToReview = $session->getNextCard();
+
+        $this->loginUser($box->creator);
 
         $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->seeStatusCode(200);
         
-        $cardToReview->refresh();
+        $cardToReview->progress->refresh();
 
-        $this->assertEquals($cardToReview->deck_id, $session->deck_id);
-
-        $session->complete();
-        $session->start();
-
-        $cardToReview = $session->getNextCardToReview();
-
-        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
-            ->seeStatusCode(200);
-        
-        $previousDeckID = $cardToReview->deck_id;
-
-        $cardToReview->refresh();
-
-        $this->assertEquals($cardToReview->deck_id, $previousDeckID);
+        $this->assertEquals($cardToReview->progress->deck_id, $session->deck_id);
     }
 
+    /** 
+     * @todo check if this should be a unit test.
+     * 
+     * @test 
+     */
     public function when_a_card_is_reviewed_the_reviewed_at_column_is_updated()
     {
-        // maybe this should be a unit test: testGetSessionUpdatesReviewedAt()
-        
         $box = Box::factory()->hasCards(1)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id')
@@ -309,15 +346,17 @@ class ReviewCardTest extends TestCase
 
         $session->start();
 
-        $cardToReview = $session->getNextCardToReview();
+        $cardToReview = $session->getNextCard();
+
+        $this->loginUser($box->creator);
 
         $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->seeStatusCode(200);
         
-        $previousReviewedAt = $cardToReview->reviewed_at;
+        $previousReviewedAt = $cardToReview->progress->reviewed_at;
     
-        $cardToReview->refresh();
+        $cardToReview->progress->refresh();
 
-        $this->assertNotEquals($cardToReview->reviewed_at, $previousReviewedAt);
+        $this->assertNotEquals($cardToReview->progress->reviewed_at, $previousReviewedAt);
     }
 }

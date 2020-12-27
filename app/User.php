@@ -69,7 +69,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * Create a session for the user on the given box.
      *
-     * @param  \App\Box|int  $box
+     * @param  int|\App\Box  $box
      * @return \App\Session
      */
     public function createSession($box)
@@ -82,7 +82,9 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * Get the user's session on the given box.
      *
-     * @param  \App\Box|int  $box
+     * @todo rename this to findSessionOfFail
+     *
+     * @param  int|\App\Box  $box
      * @return \App\Session
      */
     public function getSession($box)

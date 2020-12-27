@@ -66,6 +66,8 @@ class Box extends Model
     /**
      * Get a session associated with the box for the user.
      *
+     * @todo rename this to findSessionOfFail
+     * 
      * @param  \App\User|int  $user
      * @return \App\Session
      */

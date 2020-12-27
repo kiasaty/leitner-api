@@ -48,13 +48,15 @@ class Session extends Model
      *
      * @return string
      */
-    private function getCurrentDeck()
+    public function getDeckIdAttribute()
     {
         return array_keys(preg_grep("/^{$this->number}/i", self::DECKS))[0];
     }
 
     /**
      * Get the decks_ids.
+     * 
+     * @todo create a virtual model for decks.
      *
      * @return string
      */
@@ -159,7 +161,7 @@ class Session extends Model
      */
     public function isCardReviewed($card)
     {
-        return $card->progress->reviewed_at > $this->started_at;
+        return $card->progress->reviewed_at >= $this->started_at;
     }
 
     /**
@@ -179,7 +181,7 @@ class Session extends Model
         }
 
         if ($level === 1) {
-            $data['deck_id'] = $this->getCurrentDeck();
+            $data['deck_id'] = $this->deck_id;
         } elseif ($level === 4) {
             $data['deck_id'] = 12;
         }
@@ -284,9 +286,9 @@ class Session extends Model
     {
         $cardID = is_int($card) ? $card : $card['id'];
 
-        return $this->relationLoaded('cards') ?
-            $this->cards->where('id', $cardID)->exists() :
-            $this->cards()->where('id', $cardID)->exists();
+        $cards = $this->relationLoaded('cards') ? $this->cards : $this->cards();
+
+        return $cards->where('id', $cardID)->whereIn('deck_id', $this->decks_ids)->exists();
     }
 
     /**

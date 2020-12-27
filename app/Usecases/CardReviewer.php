@@ -34,7 +34,7 @@ class CardReviewer
     
     public function review()
     {
-        $this->checkIfTheCardIsInSessionBox()
+        $this->checkIfCardIsInSessionBox()
             ->checkIfSessionIsRunning()
             ->checkIfCardIsInSession()
             ->checkIfCardHasBeenReviewed();
@@ -46,7 +46,7 @@ class CardReviewer
         }
     }
 
-    public function checkIfTheCardIsInSessionBox()
+    public function checkIfCardIsInSessionBox()
     {
         if ($this->session->box_id != $this->card->box_id) {
             abort(422, 'The card does not exist in the session box.');
