@@ -67,24 +67,30 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
     
     /**
-     * Get the user's session by boxID.
+     * Create a session for the user on the given box.
      *
-     * @param  int  $boxID
+     * @param  int|\App\Box  $box
      * @return \App\Session
      */
-    public function getSession($boxID)
+    public function createSession($box)
     {
-        return $this->sessions()->firstOrCreate(['box_id' => $boxID]);
+        return $this->sessions()->create([
+            'box_id' => is_numeric($box) ? $box : $box->id
+        ]);
     }
     
     /**
-     * Get the user's card.
+     * Get the user's session on the given box.
      *
-     * @param  int  $cardID
-     * @return \App\Card
+     * @todo rename this to findSessionOfFail
+     *
+     * @param  int|\App\Box  $box
+     * @return \App\Session
      */
-    public function getCard($cardID)
+    public function getSession($box)
     {
-        return $this->cards()->findOrFail($cardID);
+        $boxID = is_numeric($box) ? $box : $box->id;
+
+        return $this->sessions()->where('box_id', $boxID)->firstOrFail();
     }
 }

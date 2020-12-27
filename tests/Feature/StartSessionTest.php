@@ -21,13 +21,15 @@ class StartSessionTest extends TestCase
     public function users_can_start_a_session_on_their_own_boxes()
     {
         $box = Box::factory()->hasCards(5)->create();
+        
+        $session = $box->createSession($box->creator_id);
 
         $this->loginUser($box->creator);
         
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(200);
         
-        $session = $box->getSession($box->creator_id);
+        $session->refresh();
             
         $this->assertTrue($session->isRunning());
     }
@@ -39,10 +41,12 @@ class StartSessionTest extends TestCase
 
         $user = $this->loginUser();
 
+        $session = $box->createSession($user);
+
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(200);
         
-        $session = $box->getSession($user->id);
+        $session->refresh();
                 
         $this->assertTrue($session->isRunning());
     }
@@ -52,12 +56,14 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->create();
 
+        $session = $box->createSession($box->creator_id);
+
         $this->loginUser($box->creator);
 
         $this->post("boxes/{$box->id}/session/start")
             ->seeStatusCode(422);
         
-        $session = $box->getSession($box->creator_id);
+        $session->refresh();
                     
         $this->assertFalse($session->isRunning());
     }
@@ -67,7 +73,7 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id'),
@@ -89,7 +95,7 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->pluck('id'),
@@ -115,7 +121,7 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->take(3)->pluck('id'),
@@ -142,7 +148,7 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $session = $box->getSession($box->creator_id);
+        $session = $box->createSession($box->creator_id);
 
         $session->addCards(
             $box->cards->take(3)->pluck('id'),

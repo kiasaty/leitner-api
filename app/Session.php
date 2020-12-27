@@ -48,13 +48,15 @@ class Session extends Model
      *
      * @return string
      */
-    private function getCurrentDeck()
+    public function getDeckIdAttribute()
     {
         return array_keys(preg_grep("/^{$this->number}/i", self::DECKS))[0];
     }
 
     /**
      * Get the decks_ids.
+     * 
+     * @todo create a virtual model for decks.
      *
      * @return string
      */
@@ -93,11 +95,17 @@ class Session extends Model
      * Start a new learning session.
      *
      * @todo Refactor this.
-     * @return bool
+     * @return void
      */
     public function start()
     {
-        return (new SessionStarter($this))->start();
+        $nextSessionNumber = is_null($this->started_at) || $this->number == 9 ? 0 : $this->number + 1;
+
+        $this->update([
+            'number'        => $nextSessionNumber,
+            'started_at'    => $this->freshTimestamp(),
+            'completed_at'  => null
+        ]);
     }
 
     /**
@@ -136,14 +144,12 @@ class Session extends Model
     /**
      * Review a card in the session.
      *
-     * @param  int $cardID
+     * @param  \App\Card  $card
      * @param  int  $remember
      * @return void
      */
-    public function review($cardID, $remember)
+    public function review($card, $remember)
     {
-        $card = $this->getCard($cardID);
-
         (new CardReviewer($this, $card, $remember))->review();
     }
     
@@ -155,7 +161,7 @@ class Session extends Model
      */
     public function isCardReviewed($card)
     {
-        return $card->progress->reviewed_at > $this->started_at;
+        return $card->progress->reviewed_at >= $this->started_at;
     }
 
     /**
@@ -175,7 +181,7 @@ class Session extends Model
         }
 
         if ($level === 1) {
-            $data['deck_id'] = $this->getCurrentDeck();
+            $data['deck_id'] = $this->deck_id;
         } elseif ($level === 4) {
             $data['deck_id'] = 12;
         }
@@ -231,6 +237,18 @@ class Session extends Model
         return $this->isStarted() && !$this->isCompleted();
     }
 
+    public function fetchNewCardsFromBox($maxNewCardsToBeAdded)
+    {
+        $reviewingCardsIDs = $this->cards->pluck('id');
+            
+        $cardsIDs = $this->box->cards()
+            ->whereNotIn('id', $reviewingCardsIDs)
+            ->take($maxNewCardsToBeAdded)
+            ->pluck('id');
+
+        $this->addCards($cardsIDs);
+    }
+
     /**
      * Add cards to the session from the box.
      *
@@ -253,11 +271,9 @@ class Session extends Model
      * @param  int  $cardID
      * @return \App\Card
      */
-    public function getCard($cardID)
+    public function findCardOrFail($cardID)
     {
-        return $this->relationLoaded('cards') ?
-            $this->cards->find($cardID) :
-            $this->cards()->find($cardID);
+        return $this->cards()->findOrFail($cardID);
     }
 
     /**
@@ -270,9 +286,9 @@ class Session extends Model
     {
         $cardID = is_int($card) ? $card : $card['id'];
 
-        return $this->relationLoaded('cards') ?
-            $this->cards->where('id', $cardID)->exists() :
-            $this->cards()->where('id', $cardID)->exists();
+        $cards = $this->relationLoaded('cards') ? $this->cards : $this->cards();
+
+        return $cards->where('id', $cardID)->whereIn('deck_id', $this->decks_ids)->exists();
     }
 
     /**

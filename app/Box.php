@@ -51,13 +51,30 @@ class Box extends Model
     }
 
     /**
-     * Get a session associated with the box for a user.
+     * Create a session on the box for the user.
      *
-     * @param  int  $userID
+     * @param  \App\User|int  $user
      * @return \App\Session
      */
-    public function getSession($userID)
+    public function createSession($user)
     {
-        return $this->sessions()->firstOrCreate(['user_id' => $userID]);
+        return $this->sessions()->create([
+            'user_id' => is_numeric($user) ? $user : $user->id
+        ]);
+    }
+
+    /**
+     * Get a session associated with the box for the user.
+     *
+     * @todo rename this to findSessionOfFail
+     * 
+     * @param  \App\User|int  $user
+     * @return \App\Session
+     */
+    public function getSession($user)
+    {
+        $userID = is_numeric($user) ? $user : $user->id;
+
+        return $this->sessions()->where('user_id', $userID)->firstOrFail();
     }
 }

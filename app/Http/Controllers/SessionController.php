@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Box;
 use Illuminate\Http\Request;
 use App\Http\Resources\CardResource;
+use App\Usecases\SessionStarter;
 
 class SessionController extends Controller
 {
@@ -19,13 +21,13 @@ class SessionController extends Controller
      * @param  int  $boxID
      * @return \Illuminate\Http\Response
      */
-    public function start(Request $request, $boxID)
+    public function start(Request $request, $boxID, SessionStarter $sessionStarter)
     {
         $session = $request->user()->getSession($boxID);
 
         $this->authorize('update', $session);
 
-        $session->start();
+        $sessionStarter->start($session);
 
         if ($nextCard = $session->getNextCard()) {
             return new CardResource($nextCard);
@@ -63,12 +65,12 @@ class SessionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $boxID
+     * @param  int  $cardID
      * @return \Illuminate\Http\Response
      */
-    public function review(Request $request, $boxID)
+    public function review(Request $request, $boxID, $cardID)
     {
         $validatedInput = $this->validate($request, [
-            'card_id'   => 'required|numeric',
             'remember'  => 'required|boolean'
         ]);
 
@@ -76,10 +78,9 @@ class SessionController extends Controller
 
         $this->authorize('update', $session);
 
-        $session->review(
-            $validatedInput['card_id'],
-            $validatedInput['remember']
-        );
+        $card = $session->findCardOrFail($cardID);
+
+        $session->review($card, $validatedInput['remember']);
 
         if ($nextCard = $session->getNextCard()) {
             return new CardResource($nextCard);
