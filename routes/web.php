@@ -33,9 +33,9 @@ $router->group(['prefix' => 'boxes'], function () use ($router) {
 $router->group(['prefix' => 'users/{userID}/boxes'], function () use ($router) {
     $router->get('/', 'UserBoxController@index');
     $router->post('/', 'UserBoxController@store');
-    $router->get('/{id}', 'UserBoxController@show');
-    $router->put('/{id}', 'UserBoxController@update');
-    $router->delete('/{id}', 'UserBoxController@destroy');
+    $router->get('/{boxID}', 'UserBoxController@show');
+    $router->put('/{boxID}', 'UserBoxController@update');
+    $router->delete('/{boxID}', 'UserBoxController@destroy');
 });
 
 $router->group(['prefix' => 'boxes/{boxID}/cards'], function () use ($router) {
