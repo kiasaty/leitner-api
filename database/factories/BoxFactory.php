@@ -28,4 +28,20 @@ class BoxFactory extends Factory
             'description'   => $this->faker->sentence,
         ];
     }
+
+    /**
+     * Set the creator of the box.
+     *
+     * @param  \App\Model\User|int
+     * @return \Illuminate\Database\Eloquent\Factories\Factory
+     */
+    public function creator($creator)
+    {
+        return $this->state(function () use ($creator) {
+            return [
+                'creator_id' => is_numeric($creator) ? $creator : $creator->id,
+            ];
+        });
+}
+
 }
