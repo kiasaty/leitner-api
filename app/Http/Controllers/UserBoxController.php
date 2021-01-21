@@ -23,7 +23,7 @@ class UserBoxController extends Controller
     {
         $user = User::findOrFail($userID);
 
-        $boxes = $user->createdBoxes;
+        $boxes = $user->boxes;
         
         return BoxResource::collection($boxes);
     }
@@ -41,7 +41,7 @@ class UserBoxController extends Controller
 
         $user = User::findOrFail($userID);
 
-        $box = $user->createdBoxes()->create($validatedInput);
+        $box = $user->boxes()->create($validatedInput);
 
         return new BoxResource($box);
     }
@@ -57,7 +57,7 @@ class UserBoxController extends Controller
     {
         $user = User::findOrFail($userID);
 
-        $box = $user->createdBoxes()->findOrFail($boxID);
+        $box = $user->boxes()->findOrFail($boxID);
 
         return new BoxResource($box);
     }
@@ -74,7 +74,7 @@ class UserBoxController extends Controller
     {
         $user = User::findOrFail($userID);
 
-        $box = $user->createdBoxes()->findOrFail($boxID);
+        $box = $user->boxes()->findOrFail($boxID);
 
         $this->authorize('update', $box);
 
@@ -96,7 +96,7 @@ class UserBoxController extends Controller
     {
         $user = User::findOrFail($userID);
 
-        $box = $user->createdBoxes()->findOrFail($boxID);
+        $box = $user->boxes()->findOrFail($boxID);
 
         $this->authorize('update', $box);
 

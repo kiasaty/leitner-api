@@ -17,7 +17,7 @@ class DatabaseSeeder extends Seeder
     public function run()
     {
         User::factory()->count(5)->create()->each(function ($user) {
-            $user->createdBoxes()->saveMany(
+            $user->boxes()->saveMany(
                 Box::factory()->count(2)->create(['creator_id' => $user->id])->each(function ($box) {
                     $box->creator->boxes()->attach($box->id);
 

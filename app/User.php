@@ -43,7 +43,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * The boxes that the user has created.
      */
-    public function createdBoxes()
+    public function boxes()
     {
         return $this->hasMany('App\Box', 'creator_id');
     }
