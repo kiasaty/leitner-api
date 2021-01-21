@@ -19,7 +19,26 @@ class SessionController extends Controller
      *
      * @param  \Illuminate\Http\Request  $request
      * @param  int  $boxID
-     * @return \Illuminate\Http\Response
+     * @return void
+     */
+    public function create(Request $request, $boxID)
+    {
+        $user = $request->user();
+        
+        if ($user->hasSession($boxID)) {
+            abort(422, 'There is already a session on this box.');
+        }
+        
+        $user->createSession($boxID);
+    }
+
+    /**
+     * Start a new learning session.
+     *
+     * @param  \Illuminate\Http\Request  $request
+     * @param  int  $boxID
+     * @param  \App\Usecases\SessionStarter  $sessionStarter
+     * @return \Illuminate\Http\Response|void
      */
     public function start(Request $request, $boxID, SessionStarter $sessionStarter)
     {

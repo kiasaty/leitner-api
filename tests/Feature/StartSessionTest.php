@@ -52,6 +52,21 @@ class StartSessionTest extends TestCase
     }
 
     /** @test */
+    public function users_can_not_start_a_session_when_they_dont_have_a_session_on_box()
+    {
+        $box = Box::factory()->hasCards(5)->create();
+        
+        $this->loginUser($box->creator);
+        
+        $this->post("boxes/{$box->id}/session/start")
+            ->seeStatusCode(404)
+            ->notSeeInDatabase('sessions', [
+                'box_id' => $box->id,
+                'user_id' => $box->creator_id,
+            ]);
+    }
+
+    /** @test */
     public function new_session_can_not_be_started_when_box_is_empty()
     {
         $box = Box::factory()->create();

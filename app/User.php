@@ -49,16 +49,6 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     }
 
     /**
-     * The boxes that the user is learning.
-     */
-    public function boxes()
-    {
-        return $this->belongsToMany('App\Box', 'sessions')
-            ->as('session')
-            ->withPivot(['number', 'started_at']);
-    }
-
-    /**
      * The learning sessions associated with the user.
      */
     public function sessions()
@@ -77,6 +67,19 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $this->sessions()->create([
             'box_id' => is_numeric($box) ? $box : $box->id
         ]);
+    }
+    
+    /**
+     * Check if the user has a session on the given box.
+     *
+     * @param  int|\App\Box  $box
+     * @return bool
+     */
+    public function hasSession($box)
+    {
+        return $this->sessions()
+            ->where('box_id', is_numeric($box) ? $box : $box->id)
+            ->exists();
     }
     
     /**

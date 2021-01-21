@@ -43,8 +43,6 @@ class UserBoxController extends Controller
 
         $box = $user->createdBoxes()->create($validatedInput);
 
-        $user->boxes()->attach($box->id);
-
         return new BoxResource($box);
     }
 
