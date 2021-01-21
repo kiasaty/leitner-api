@@ -37,6 +37,8 @@ class UserBoxController extends Controller
      */
     public function store(Request $request, $userID)
     {
+        $this->authorize('store', [Box::class, $userID]);
+        
         $validatedInput = $this->validateInput($request);
 
         $user = User::findOrFail($userID);
