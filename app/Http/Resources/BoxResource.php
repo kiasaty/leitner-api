@@ -19,6 +19,7 @@ class BoxResource extends JsonResource
 
             // Attributes
             'id'            => $this->id,
+            'creator_id'    => $this->creator_id,
             'title'         => $this->title,
             'description'   => $this->description,
             'created_at'    => date_format($this->created_at, 'Y-m-d H:m:s'),

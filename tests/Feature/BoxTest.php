@@ -19,7 +19,8 @@ class BoxTest extends TestCase
         
         $this->post("users/{$user->id}/boxes", $box)
             ->seeStatusCode(201)
-            ->seeInDatabase('boxes', $box);
+            ->seeInDatabase('boxes', $box)
+            ->seeJsonContains($box);
     }
 
     /** @test */
