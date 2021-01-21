@@ -7,7 +7,7 @@ use App\Card;
 use Carbon\Carbon;
 use Tests\TestCase;
 
-class ReviewCardTest extends TestCase
+class ReviewSessionCardTest extends TestCase
 {
     /** @test */
     public function guests_can_not_review_cards()
