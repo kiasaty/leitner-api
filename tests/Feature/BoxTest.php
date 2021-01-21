@@ -87,4 +87,68 @@ class BoxTest extends TestCase
             ->seeStatusCode(403)
             ->notSeeInDatabase('boxes', $attributes);
     }
+
+    /** @test */
+    public function users_can_delete_their_boxes()
+    {
+        $box = Box::factory()->create();
+        
+        $this->loginUser($box->creator);
+        
+        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
+            ->seeStatusCode(200)
+            ->notSeeInDatabase('boxes', $box->makeHidden('creator')->toArray());
+    }
+
+    /** @test */
+    public function guests_can_not_delete_boxes()
+    {
+        $box = Box::factory()->create();
+
+        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
+            ->seeStatusCode(401)
+            ->seeInDatabase('boxes', $box->toArray());
+    }
+
+    /** @test */
+    public function users_can_only_delete_their_own_boxes_not_other_users_boxes()
+    {
+        $box = Box::factory()->create();
+
+        $this->loginUser();
+        
+        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
+            ->seeStatusCode(403)
+            ->seeInDatabase('boxes', $box->toArray());
+    }
+
+    /** @test */
+    public function box_can_not_be_deleted_if_creator_has_a_session_on_it()
+    {
+        $box = Box::factory()->create();
+
+        $box->createSession($box->creator);
+        
+        $this->loginUser($box->creator);
+        
+        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
+            ->seeStatusCode(422)
+            ->seeInDatabase('boxes', $box->makeHidden('creator')->toArray());
+    }
+
+    /** @test */
+    public function box_can_not_be_deleted_if_other_users_have_sessions_on_it()
+    {
+        $box = Box::factory()->create();
+
+        $user = User::factory()->create();
+        
+        $box->createSession($user);
+        
+        $this->loginUser($box->creator);
+        
+        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
+            ->seeStatusCode(422)
+            ->seeInDatabase('boxes', $box->makeHidden('creator')->toArray());
+    }
 }
