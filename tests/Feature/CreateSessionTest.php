@@ -8,9 +8,18 @@ use Tests\TestCase;
 class CreateSessionTest extends TestCase
 {
     /** @test */
+    public function guests_can_not_create_sessions()
+    {
+        $box = Box::factory()->create();
+        
+        $this->post("boxes/{$box->id}/session/create")
+            ->seeStatusCode(401);
+    }
+    
+    /** @test */
     public function users_can_create_session_on_their_own_boxes()
     {
-        $box = Box::factory()->hasCards(5)->create();
+        $box = Box::factory()->create();
         
         $this->loginUser($box->creator);
         
@@ -25,7 +34,7 @@ class CreateSessionTest extends TestCase
     /** @test */
     public function users_can_create_session_on_other_people_boxes()
     {
-        $box = Box::factory()->hasCards(5)->create();
+        $box = Box::factory()->create();
         
         $user = $this->loginUser();
         
