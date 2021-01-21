@@ -28,24 +28,63 @@ class BoxTest extends TestCase
     {
         $user = User::factory()->create();
 
-        $box = Box::factory()->raw();
+        $box = Box::factory()->creator($user)->raw();
         
         $this->post("users/{$user->id}/boxes", $box)
-            ->seeStatusCode(401);
+            ->seeStatusCode(401)
+            ->notSeeInDatabase('boxes', $box);
     }
 
     /** @test */
     public function users_can_only_create_boxes_for_themselves_not_for_other_users()
     {
-        $creator = User::factory()->create();
-
-        $anotherUser = User::factory()->create();
-
         $box = Box::factory()->raw();
         
-        $this->loginUser($creator);
+        $this->loginUser();
         
-        $this->post("users/{$anotherUser->id}/boxes", $box)
-            ->seeStatusCode(403);
+        $this->post("users/{$box['creator_id']}/boxes", $box)
+            ->seeStatusCode(403)
+            ->notSeeInDatabase('boxes', $box);
+    }
+
+    /** @test */
+    public function users_can_update_their_boxes()
+    {
+        $box = Box::factory()->create();
+        
+        $attributes = Box::factory()->creator($box->creator)->raw();
+        
+        $this->loginUser($box->creator);
+        
+        $this->put("users/{$box->creator_id}/boxes/{$box->id}", $attributes)
+            ->seeStatusCode(200)
+            ->seeInDatabase('boxes', $attributes)
+            ->seeJsonContains($attributes);
+    }
+
+    /** @test */
+    public function guests_can_not_update_boxes()
+    {
+        $box = Box::factory()->create();
+
+        $attributes = Box::factory()->creator($box->creator_id)->raw();
+        
+        $this->put("users/{$box->creator_id}/boxes/{$box->id}", $attributes)
+            ->seeStatusCode(401)
+            ->notSeeInDatabase('boxes', $attributes);
+    }
+
+    /** @test */
+    public function users_can_only_update_their_own_boxes_not_other_users_boxes()
+    {
+        $box = Box::factory()->create();
+
+        $attributes = Box::factory()->creator($box->creator_id)->raw();
+        
+        $this->loginUser();
+        
+        $this->put("users/{$box->creator_id}/boxes/{$box->id}", $attributes)
+            ->seeStatusCode(403)
+            ->notSeeInDatabase('boxes', $attributes);
     }
 }
