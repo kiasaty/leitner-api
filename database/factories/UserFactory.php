@@ -27,7 +27,7 @@ class UserFactory extends Factory
             'username'      => $this->faker->userName,
             'email'         => $this->faker->email,
             'password'      => app('hash')->make('secret'),
-            'profile_photo' => $this->faker->imageUrl,
+            'avatar'        => $this->faker->imageUrl,
         ];
     }
 }
