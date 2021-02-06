@@ -37,13 +37,8 @@ class CardReviewer
         $this->checkIfCardIsInSessionBox()
             ->checkIfSessionIsRunning()
             ->checkIfCardIsInSession()
-            ->checkIfCardHasBeenReviewed();
-
-        if ($this->remember) {
-            $this->session->promoteCard($this->card);
-        } else {
-            $this->session->demoteCard($this->card);
-        }
+            ->checkIfCardHasBeenReviewed()
+            ->process();
     }
 
     public function checkIfCardIsInSessionBox()
@@ -101,5 +96,23 @@ class CardReviewer
         }
 
         return $this;
+    }
+
+    /**
+     * Process the card in the session.
+     * 
+     * @return void
+     */
+    private function process()
+    {
+        if ($this->session->isCardNew($this->card)) {
+            return $this->session->learnCard($this->card);
+        }
+        
+        if ($this->remember) {
+            return $this->session->promoteCard($this->card);
+        }
+
+        return $this->session->demoteCard($this->card);
     }
 }

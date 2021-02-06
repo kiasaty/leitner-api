@@ -3,7 +3,6 @@
 namespace App;
 
 use App\Usecases\CardReviewer;
-use App\Usecases\SessionStarter;
 use Illuminate\Database\Eloquent\Model;
 
 class Session extends Model
@@ -154,7 +153,7 @@ class Session extends Model
     }
     
     /**
-     * Check if the card has been reviewed.
+     * Check if the card has been reviewed in the current session.
      *
      * @param \App\Card $card
      * @return bool
@@ -162,6 +161,30 @@ class Session extends Model
     public function isCardReviewed($card)
     {
         return $card->progress->reviewed_at >= $this->started_at;
+    }
+
+    /**
+     * Check if the card has been just added to the session.
+     *
+     * @param \App\Card $card
+     * @return bool
+     */
+    public function isCardNew($card)
+    {
+        return is_null($card->progress->reviewed_at);
+    }
+
+    /**
+     * Learn a newly added card in the session.
+     * 
+     * @param  int|\App\Card  $card
+     * @return void
+     */
+    public function learnCard($card)
+    {
+        $this->updateCard(is_numeric($card) ? $card : $card->id, [
+            'reviewed_at' => $this->freshTimestamp()
+        ]);
     }
 
     /**
@@ -237,6 +260,12 @@ class Session extends Model
         return $this->isStarted() && !$this->isCompleted();
     }
 
+    /**
+     * Fetch new cards from the box and add them to the learning session.
+     * 
+     * @param  int  $maxNewCardsToBeAdded
+     * @return void
+     */
     public function fetchNewCardsFromBox($maxNewCardsToBeAdded)
     {
         $reviewingCardsIDs = $this->cards->pluck('id');
@@ -284,7 +313,7 @@ class Session extends Model
      */
     public function hasCard($card)
     {
-        $cardID = is_int($card) ? $card : $card['id'];
+        $cardID = is_numeric($card) ? $card : $card['id'];
 
         $cards = $this->relationLoaded('cards') ? $this->cards : $this->cards();
 
