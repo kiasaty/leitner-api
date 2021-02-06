@@ -197,7 +197,7 @@ class ReviewSessionCardTest extends TestCase
     }
 
     /** @test */
-    public function a_card_will_be_promoted_if_user_remembers_it()
+    public function a_newly_added_card_does_not_get_promoted_or_demoted()
     {
         $box = Box::factory()->hasCards(1)->create();
 
@@ -220,11 +220,12 @@ class ReviewSessionCardTest extends TestCase
         $cardToReview->progress->refresh();
         $newLevel = $cardToReview->progress->level;
 
-        $this->assertEquals($newLevel, $previousLevel + 1);
+        $this->assertEquals($newLevel, $previousLevel);
+        $this->assertEquals($cardToReview->progress->deck_id, 1);
     }
 
     /** @test */
-    public function a_card_will_be_demoted_if_user_does_not_remember_it()
+    public function a_card_gets_promoted_if_user_remembers_it()
     {
         $box = Box::factory()->hasCards(1)->create();
 
@@ -232,7 +233,35 @@ class ReviewSessionCardTest extends TestCase
 
         $session->addCards(
             $box->cards->pluck('id'),
-            ['level' => 3, 'deck_id' => 2]
+            ['level' => 1, 'deck_id' => 1, 'reviewed_at' => Carbon::now()->subMinute()]
+        );
+
+        $session->start();
+
+        $cardToReview = $session->getNextCard();
+
+        $this->loginUser($box->creator);
+        
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+            ->seeStatusCode(200);
+        
+        $previousLevel = $cardToReview->progress->level;
+        $cardToReview->progress->refresh();
+        $newLevel = $cardToReview->progress->level;
+
+        $this->assertEquals($newLevel, $previousLevel + 1);
+    }
+
+    /** @test */
+    public function a_card_gets_demoted_if_user_does_not_remember_it()
+    {
+        $box = Box::factory()->hasCards(1)->create();
+
+        $session = $box->createSession($box->creator_id);
+
+        $session->addCards(
+            $box->cards->pluck('id'),
+            ['level' => 3, 'deck_id' => 2, 'reviewed_at' => Carbon::now()->subMinute()]
         );
 
         $session->start();
@@ -259,7 +288,7 @@ class ReviewSessionCardTest extends TestCase
 
         $session->addCards(
             $box->cards->pluck('id'),
-            ['level' => 3, 'deck_id' => 2]
+            ['level' => 3, 'deck_id' => 2, 'reviewed_at' => Carbon::now()->subMinute()]
         );
 
         $session->start();
@@ -286,7 +315,7 @@ class ReviewSessionCardTest extends TestCase
 
         $session->addCards(
             $box->cards->pluck('id'),
-            ['level' => 3, 'deck_id' => 2]
+            ['level' => 3, 'deck_id' => 2, 'reviewed_at' => Carbon::now()->subMinute()]
         );
 
         $session->start();
@@ -312,7 +341,8 @@ class ReviewSessionCardTest extends TestCase
         $session = $box->createSession($box->creator_id);
 
         $session->addCards(
-            $box->cards->pluck('id')
+            $box->cards->pluck('id'),
+            ['level' => 1, 'deck_id' => 1, 'reviewed_at' => Carbon::now()->subMinute()]
         );
 
         $session->start();
