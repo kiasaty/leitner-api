@@ -2,8 +2,8 @@
 
 namespace Database\Factories;
 
-use App\Box;
-use App\User;
+use App\Models\Box;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class BoxFactory extends Factory

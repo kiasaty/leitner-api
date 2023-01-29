@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use Firebase\JWT\JWT;
 use Illuminate\Http\Request;
 use App\Http\Resources\UserResource;
@@ -47,7 +47,7 @@ class AuthController extends Controller
      * Finds the user by username
      *
      * @param  array  $credentials
-     * @return \App\User
+     * @return \App\Models\User
      */
     private function findUser($credentials)
     {
@@ -58,7 +58,7 @@ class AuthController extends Controller
     /**
      * Check if the credentials are correct.
      *
-     * @param  \App\User $user
+     * @param  \App\Models\User $user
      * @param  array $credentials
      * @throws \Exception
      */
@@ -74,7 +74,7 @@ class AuthController extends Controller
      *
      * @todo get TOKEN_LIFE_TIME form config.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return string  jwt token
      */
     private function generateJWT($user)

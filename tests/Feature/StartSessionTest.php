@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Box;
-use App\Card;
+use App\Models\Box;
+use App\Models\Card;
 use Tests\TestCase;
 
 class StartSessionTest extends TestCase
@@ -13,8 +13,8 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(401);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(401);
     }
     
     /** @test */
@@ -26,8 +26,8 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
         
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(200);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(200);
         
         $session->refresh();
             
@@ -43,8 +43,8 @@ class StartSessionTest extends TestCase
 
         $session = $box->createSession($user);
 
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(200);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(200);
         
         $session->refresh();
                 
@@ -57,13 +57,14 @@ class StartSessionTest extends TestCase
         $box = Box::factory()->hasCards(5)->create();
         
         $this->loginUser($box->creator);
-        
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(404)
-            ->notSeeInDatabase('sessions', [
-                'box_id' => $box->id,
-                'user_id' => $box->creator_id,
-            ]);
+
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(404);
+
+        $this->assertDatabaseMissing('sessions', [
+            'box_id' => $box->id,
+            'user_id' => $box->creator_id,
+        ]);
     }
 
     /** @test */
@@ -75,8 +76,8 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(422);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(422);
         
         $session->refresh();
                     
@@ -97,8 +98,8 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(422);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(422);
         
         $session->refresh();
                         
@@ -123,8 +124,8 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(200);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(200);
                          
         $session->refresh();
             
@@ -145,8 +146,8 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(200);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(200);
                          
         $session->refresh();
                 
@@ -174,19 +175,19 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("boxes/{$box->id}/session/start")
-            ->seeStatusCode(422);
+        $this->post("api/boxes/{$box->id}/session/start")
+            ->assertStatus(422);
 
         $session->refresh();
 
         $this->assertFalse($session->isRunning());
         
-        // $breakTimeBetweenSessions = config('session.gap_time');
+        // $breakTimeBetweenSessions = config('leitner.gap_time');
 
         // $this->travel($breakTimeBetweenSessions + 1)->minutes();
 
         // $this->post("boxes/{$box->id}/session/start")
-        //     ->seeStatusCode(200);
+        //     ->assertStatus(200);
 
         // $this->assertTrue($session->isRunning());
     }

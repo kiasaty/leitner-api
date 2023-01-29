@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use App\Usecases\CardReviewer;
 use Illuminate\Database\Eloquent\Model;
@@ -69,7 +69,7 @@ class Session extends Model
      */
     public function box()
     {
-        return $this->belongsTo('App\Box');
+        return $this->belongsTo('App\Models\Box');
     }
 
     /**
@@ -77,7 +77,7 @@ class Session extends Model
      */
     public function user()
     {
-        return $this->belongsTo('App\User');
+        return $this->belongsTo('App\Models\User');
     }
 
     /**
@@ -85,7 +85,7 @@ class Session extends Model
      */
     public function cards()
     {
-        return $this->belongsToMany('App\Card', 'session_card')
+        return $this->belongsToMany('App\Models\Card', 'session_card')
             ->as('progress')
             ->withPivot(['level', 'deck_id', 'difficulty', 'reviewed_at']);
     }
@@ -125,7 +125,7 @@ class Session extends Model
     /**
      * Get the next card in the session.
      *
-     * @return \App\Card
+     * @return \App\Models\Card
      */
     public function getNextCard()
     {
@@ -143,7 +143,7 @@ class Session extends Model
     /**
      * Review a card in the session.
      *
-     * @param  \App\Card  $card
+     * @param  \App\Models\Card  $card
      * @param  int  $remember
      * @return void
      */
@@ -155,7 +155,7 @@ class Session extends Model
     /**
      * Check if the card has been reviewed in the current session.
      *
-     * @param \App\Card $card
+     * @param \App\Models\Card $card
      * @return bool
      */
     public function isCardReviewed($card)
@@ -166,7 +166,7 @@ class Session extends Model
     /**
      * Check if the card has been just added to the session.
      *
-     * @param \App\Card $card
+     * @param \App\Models\Card $card
      * @return bool
      */
     public function isCardNew($card)
@@ -177,7 +177,7 @@ class Session extends Model
     /**
      * Learn a newly added card in the session.
      * 
-     * @param  int|\App\Card  $card
+     * @param  int|\App\Models\Card  $card
      * @return void
      */
     public function learnCard($card)
@@ -190,7 +190,7 @@ class Session extends Model
     /**
      * Move the card one level forward.
      *
-     * @param \App\Card $card
+     * @param \App\Models\Card $card
      * @return void
      */
     public function promoteCard($card)
@@ -217,7 +217,7 @@ class Session extends Model
     /**
      * Turn back the card to level 1.
      *
-     * @param \App\Card $card
+     * @param \App\Models\Card $card
      * @return void
      */
     public function demoteCard($card)
@@ -298,7 +298,7 @@ class Session extends Model
      * Get a card that is present in the session.
      *
      * @param  int  $cardID
-     * @return \App\Card
+     * @return \App\Models\Card
      */
     public function findCardOrFail($cardID)
     {
@@ -308,7 +308,7 @@ class Session extends Model
     /**
      * Check if a card is present in the session.
      *
-     * @param  \App\Card|\ArrayAccess|array|int  $card
+     * @param  \App\Models\Card|\ArrayAccess|array|int  $card
      * @return bool
      */
     public function hasCard($card)

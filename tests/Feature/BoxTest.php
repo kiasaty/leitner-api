@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Box;
-use App\User;
+use App\Models\Box;
+use App\Models\User;
 use Tests\TestCase;
 
 class BoxTest extends TestCase
@@ -16,11 +16,12 @@ class BoxTest extends TestCase
         $box = Box::factory()->creator($user)->raw();
         
         $this->loginUser($user);
-        
-        $this->post("users/{$user->id}/boxes", $box)
-            ->seeStatusCode(201)
-            ->seeInDatabase('boxes', $box)
-            ->seeJsonContains($box);
+
+        $this->post("api/users/{$user->id}/boxes", $box)
+            ->assertStatus(201)
+            ->assertJsonFragment($box);
+
+        $this->assertDatabaseHas('boxes', $box);
     }
 
     /** @test */
@@ -29,10 +30,11 @@ class BoxTest extends TestCase
         $user = User::factory()->create();
 
         $box = Box::factory()->creator($user)->raw();
-        
-        $this->post("users/{$user->id}/boxes", $box)
-            ->seeStatusCode(401)
-            ->notSeeInDatabase('boxes', $box);
+
+        $this->post("api/users/{$user->id}/boxes", $box)
+            ->assertStatus(401);
+
+        $this->assertDatabaseMissing('boxes', $box);
     }
 
     /** @test */
@@ -41,10 +43,11 @@ class BoxTest extends TestCase
         $box = Box::factory()->raw();
         
         $this->loginUser();
-        
-        $this->post("users/{$box['creator_id']}/boxes", $box)
-            ->seeStatusCode(403)
-            ->notSeeInDatabase('boxes', $box);
+
+        $this->post("api/users/{$box['creator_id']}/boxes", $box)
+            ->assertStatus(403);
+
+        $this->assertDatabaseMissing('boxes', $box);
     }
 
     /** @test */
@@ -55,11 +58,12 @@ class BoxTest extends TestCase
         $attributes = Box::factory()->creator($box->creator)->raw();
         
         $this->loginUser($box->creator);
-        
-        $this->put("users/{$box->creator_id}/boxes/{$box->id}", $attributes)
-            ->seeStatusCode(200)
-            ->seeInDatabase('boxes', $attributes)
-            ->seeJsonContains($attributes);
+
+        $this->put("api/users/{$box->creator_id}/boxes/{$box->id}", $attributes)
+            ->assertStatus(200)
+            ->assertJsonFragment($attributes);
+
+        $this->assertDatabaseHas('boxes', $attributes);
     }
 
     /** @test */
@@ -68,10 +72,11 @@ class BoxTest extends TestCase
         $box = Box::factory()->create();
 
         $attributes = Box::factory()->creator($box->creator_id)->raw();
-        
-        $this->put("users/{$box->creator_id}/boxes/{$box->id}", $attributes)
-            ->seeStatusCode(401)
-            ->notSeeInDatabase('boxes', $attributes);
+
+        $this->put("api/users/{$box->creator_id}/boxes/{$box->id}", $attributes)
+            ->assertStatus(401);
+
+            $this->assertDatabaseMissing('boxes', $attributes);
     }
 
     /** @test */
@@ -83,9 +88,10 @@ class BoxTest extends TestCase
         
         $this->loginUser();
         
-        $this->put("users/{$box->creator_id}/boxes/{$box->id}", $attributes)
-            ->seeStatusCode(403)
-            ->notSeeInDatabase('boxes', $attributes);
+        $this->put("api/users/{$box->creator_id}/boxes/{$box->id}", $attributes)
+            ->assertStatus(403);
+
+        $this->assertDatabaseMissing('boxes', $attributes);
     }
 
     /** @test */
@@ -94,10 +100,11 @@ class BoxTest extends TestCase
         $box = Box::factory()->create();
         
         $this->loginUser($box->creator);
-        
-        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
-            ->seeStatusCode(200)
-            ->notSeeInDatabase('boxes', $box->makeHidden('creator')->toArray());
+
+        $this->delete("api/users/{$box->creator_id}/boxes/{$box->id}")
+            ->assertStatus(200);
+
+            $this->assertDatabaseMissing('boxes', $box->makeHidden('creator')->toArray());
     }
 
     /** @test */
@@ -105,9 +112,10 @@ class BoxTest extends TestCase
     {
         $box = Box::factory()->create();
 
-        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
-            ->seeStatusCode(401)
-            ->seeInDatabase('boxes', $box->toArray());
+        $this->delete("api/users/{$box->creator_id}/boxes/{$box->id}")
+            ->assertStatus(401);
+
+        $this->assertDatabaseHas('boxes', $box->toArray());
     }
 
     /** @test */
@@ -116,10 +124,11 @@ class BoxTest extends TestCase
         $box = Box::factory()->create();
 
         $this->loginUser();
-        
-        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
-            ->seeStatusCode(403)
-            ->seeInDatabase('boxes', $box->toArray());
+
+        $this->delete("api/users/{$box->creator_id}/boxes/{$box->id}")
+            ->assertStatus(403);
+
+        $this->assertDatabaseHas('boxes', $box->toArray());
     }
 
     /** @test */
@@ -130,10 +139,11 @@ class BoxTest extends TestCase
         $box->createSession($box->creator);
         
         $this->loginUser($box->creator);
-        
-        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
-            ->seeStatusCode(422)
-            ->seeInDatabase('boxes', $box->makeHidden('creator')->toArray());
+
+        $this->delete("api/users/{$box->creator_id}/boxes/{$box->id}")
+            ->assertStatus(422);
+
+        $this->assertDatabaseHas('boxes', $box->makeHidden('creator')->toArray());
     }
 
     /** @test */
@@ -146,9 +156,10 @@ class BoxTest extends TestCase
         $box->createSession($user);
         
         $this->loginUser($box->creator);
-        
-        $this->delete("users/{$box->creator_id}/boxes/{$box->id}")
-            ->seeStatusCode(422)
-            ->seeInDatabase('boxes', $box->makeHidden('creator')->toArray());
+
+        $this->delete("api/users/{$box->creator_id}/boxes/{$box->id}")
+            ->assertStatus(422);
+
+        $this->assertDatabaseHas('boxes', $box->makeHidden('creator')->toArray());
     }
 }

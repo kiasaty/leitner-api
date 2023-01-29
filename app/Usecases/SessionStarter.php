@@ -2,14 +2,14 @@
 
 namespace App\Usecases;
 
-use App\Session;
+use App\Models\Session;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 
 class SessionStarter
 {
     /**
-     * @var \App\Session
+     * @var \App\Models\Session
      */
     private $session;
 
@@ -24,14 +24,14 @@ class SessionStarter
     private $maxNewCardsToBeAdded;
 
     /**
-     * @param  \App\Session
+     * @param  \App\Models\Session
      * @return void
      */
     public function __construct()
     {
-        $this->breakTimeBetweenSessions = config('session.gap_time');
+        $this->breakTimeBetweenSessions = config('leitner.gap_time');
 
-        $this->maxNewCardsToBeAdded = config('session.default_max_new_cards');
+        $this->maxNewCardsToBeAdded = config('leitner.default_max_new_cards');
     }
     
     /**

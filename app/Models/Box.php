@@ -1,6 +1,6 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -21,7 +21,7 @@ class Box extends Model
      */
     public function creator()
     {
-        return $this->belongsTo('App\User', 'creator_id');
+        return $this->belongsTo('App\Models\User', 'creator_id');
     }
 
     /**
@@ -29,7 +29,7 @@ class Box extends Model
      */
     public function users()
     {
-        return $this->belongsToMany('App\User', 'sessions')
+        return $this->belongsToMany('App\Models\User', 'sessions')
             ->as('session')
             ->withPivot(['number', 'started_at']);
     }
@@ -39,7 +39,7 @@ class Box extends Model
      */
     public function cards()
     {
-        return $this->hasMany('App\Card');
+        return $this->hasMany('App\Models\Card');
     }
 
     /**
@@ -47,14 +47,14 @@ class Box extends Model
      */
     public function sessions()
     {
-        return $this->hasMany('App\Session');
+        return $this->hasMany('App\Models\Session');
     }
 
     /**
      * Create a session on the box for the user.
      *
-     * @param  \App\User|int  $user
-     * @return \App\Session
+     * @param  \App\Models\User|int  $user
+     * @return \App\Models\Session
      */
     public function createSession($user)
     {
@@ -68,8 +68,8 @@ class Box extends Model
      *
      * @todo rename this to findSessionOfFail
      * 
-     * @param  \App\User|int  $user
-     * @return \App\Session
+     * @param  \App\Models\User|int  $user
+     * @return \App\Models\Session
      */
     public function getSession($user)
     {

@@ -2,8 +2,8 @@
 
 namespace Tests\Feature;
 
-use App\Box;
-use App\Card;
+use App\Models\Box;
+use App\Models\Card;
 use Tests\TestCase;
 
 class NextSessionCardTest extends TestCase
@@ -13,8 +13,8 @@ class NextSessionCardTest extends TestCase
     {
         $box = Box::factory()->create();
         
-        $this->get("boxes/{$box->id}/session/cards/next")
-            ->seeStatusCode(401);
+        $this->get("api/boxes/{$box->id}/session/cards/next")
+            ->assertStatus(401);
     }
 
     /** @test */
@@ -28,9 +28,9 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("boxes/{$box->id}/session/cards/next")
-            ->seeStatusCode(200)
-            ->seeJsonContains(['id' => $card->id]);
+        $this->get("api/boxes/{$box->id}/session/cards/next")
+            ->assertStatus(200)
+            ->assertJsonFragment(['id' => $card->id]);
     }
 
     /** @test */
@@ -44,8 +44,8 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser();
 
-        $this->get("boxes/{$box->id}/session/cards/next")
-            ->seeStatusCode(404);
+        $this->get("api/boxes/{$box->id}/session/cards/next")
+            ->assertStatus(404);
     }
 
     /** @test */
@@ -55,8 +55,8 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("boxes/{$box->id}/session/cards/next")
-            ->seeStatusCode(404);
+        $this->get("api/boxes/{$box->id}/session/cards/next")
+            ->assertStatus(404);
     }
 
     /** @test */
@@ -69,8 +69,8 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("boxes/{$box->id}/session/cards/next")
-            ->seeStatusCode(422);
+        $this->get("api/boxes/{$box->id}/session/cards/next")
+            ->assertStatus(422);
     }
 
     /** @test */
@@ -85,7 +85,7 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("boxes/{$box->id}/session/cards/next")
-            ->seeStatusCode(422);
+        $this->get("api/boxes/{$box->id}/session/cards/next")
+            ->assertStatus(422);
     }
 }

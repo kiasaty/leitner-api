@@ -7,14 +7,14 @@ class CardReviewer
     /**
      * The session that the reviewing card is in it.
      *
-     * @var \App\Session
+     * @var \App\Models\Session
      */
     private $session;
 
     /**
      * The card that should be reviewed.
      *
-     * @var \App\Card
+     * @var \App\Models\Card
      */
     private $card;
     

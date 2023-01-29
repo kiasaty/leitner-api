@@ -2,7 +2,7 @@
 
 namespace Tests\Feature;
 
-use App\Box;
+use App\Models\Box;
 use Tests\TestCase;
 
 class CreateSessionTest extends TestCase
@@ -12,8 +12,8 @@ class CreateSessionTest extends TestCase
     {
         $box = Box::factory()->create();
         
-        $this->post("boxes/{$box->id}/session/create")
-            ->seeStatusCode(401);
+        $this->post("api/boxes/{$box->id}/session/create")
+            ->assertStatus(401);
     }
     
     /** @test */
@@ -22,13 +22,14 @@ class CreateSessionTest extends TestCase
         $box = Box::factory()->create();
         
         $this->loginUser($box->creator);
-        
-        $this->post("boxes/{$box->id}/session/create")
-            ->seeStatusCode(200)
-            ->seeInDatabase('sessions', [
-                'box_id' => $box->id,
-                'user_id' => $box->creator_id,
-            ]);
+
+        $this->post("api/boxes/{$box->id}/session/create")
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('sessions', [
+            'box_id' => $box->id,
+            'user_id' => $box->creator_id,
+        ]);
     }
 
     /** @test */
@@ -37,12 +38,13 @@ class CreateSessionTest extends TestCase
         $box = Box::factory()->create();
         
         $user = $this->loginUser();
-        
-        $this->post("boxes/{$box->id}/session/create")
-            ->seeStatusCode(200)
-            ->seeInDatabase('sessions', [
-                'box_id' => $box->id,
-                'user_id' => $user->id,
-            ]);
+
+        $this->post("api/boxes/{$box->id}/session/create")
+            ->assertStatus(200);
+
+        $this->assertDatabaseHas('sessions', [
+            'box_id' => $box->id,
+            'user_id' => $user->id,
+        ]);
     }
 }

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Box;
+use App\Models\Box;
 use Illuminate\Http\Request;
 use App\Http\Resources\CardResource;
 

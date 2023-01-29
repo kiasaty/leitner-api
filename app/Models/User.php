@@ -1,24 +1,26 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
-use Illuminate\Auth\Authenticatable;
-use Illuminate\Contracts\Auth\Access\Authorizable as AuthorizableContract;
-use Illuminate\Contracts\Auth\Authenticatable as AuthenticatableContract;
+// use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Model;
-use Laravel\Lumen\Auth\Authorizable;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
 
-class User extends Model implements AuthenticatableContract, AuthorizableContract
+class User extends Authenticatable
 {
-    use Authenticatable, Authorizable, HasFactory;
+    use HasFactory, Notifiable;
 
     /**
      * The attributes that are mass assignable.
      *
-     * @var array
+     * @var array<int, string>
      */
-    protected $guarded = [];
+    protected $fillable = [
+        'name',
+        'email',
+        'password',
+    ];
     
     /**
     * Get the user's full name.
@@ -45,7 +47,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public function boxes()
     {
-        return $this->hasMany('App\Box', 'creator_id');
+        return $this->hasMany('App\Models\Box', 'creator_id');
     }
 
     /**
@@ -53,14 +55,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      */
     public function sessions()
     {
-        return $this->hasMany('App\Session');
+        return $this->hasMany('App\Models\Session');
     }
     
     /**
      * Create a session for the user on the given box.
      *
-     * @param  int|\App\Box  $box
-     * @return \App\Session
+     * @param  int|\App\Models\Box  $box
+     * @return \App\Models\Session
      */
     public function createSession($box)
     {
@@ -72,7 +74,7 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     /**
      * Check if the user has a session on the given box.
      *
-     * @param  int|\App\Box  $box
+     * @param  int|\App\Models\Box  $box
      * @return bool
      */
     public function hasSession($box)
@@ -87,8 +89,8 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
      *
      * @todo rename this to findSessionOfFail
      *
-     * @param  int|\App\Box  $box
-     * @return \App\Session
+     * @param  int|\App\Models\Box  $box
+     * @return \App\Models\Session
      */
     public function getSession($box)
     {

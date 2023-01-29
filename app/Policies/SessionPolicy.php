@@ -2,16 +2,16 @@
 
 namespace App\Policies;
 
-use App\User;
-use App\Session;
+use App\Models\User;
+use App\Models\Session;
 
 class SessionPolicy extends Policy
 {
     /**
      * Determine if the user is allowed to update the session.
      *
-     * @param  \App\User      $user
-     * @param  \App\Session   $session
+     * @param  \App\Models\User      $user
+     * @param  \App\Models\Session   $session
      * @return bool
      */
     public function update(User $user, Session $session)

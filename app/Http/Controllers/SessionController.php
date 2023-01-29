@@ -23,7 +23,7 @@ class SessionController extends Controller
     public function create(Request $request, $boxID)
     {
         $user = $request->user();
-        
+
         if ($user->hasSession($boxID)) {
             abort(422, 'There is already a session on this box.');
         }

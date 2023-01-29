@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Box;
-use App\Card;
-use App\User;
+use App\Models\Box;
+use App\Models\Card;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder

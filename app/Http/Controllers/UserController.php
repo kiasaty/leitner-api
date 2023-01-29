@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use App\Http\Resources\UserResource;
@@ -145,7 +145,7 @@ class UserController extends Controller
      * 
      * @todo improve the algorithm is possible
      * @param  \Illuminate\Http\Request  $request
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return Array  validated input
      */
     private function validateInput($request, $user = null)

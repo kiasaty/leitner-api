@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Box;
+use App\Models\Box;
 use App\Http\Resources\BoxResource;
 
 class BoxController extends Controller

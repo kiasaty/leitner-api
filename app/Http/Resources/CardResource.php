@@ -3,7 +3,7 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Resources\Json\JsonResource;
-use App\Session;
+use App\Models\Session;
 
 class CardResource extends JsonResource
 {

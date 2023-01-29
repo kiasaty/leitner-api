@@ -2,7 +2,7 @@
 
 namespace App\Policies;
 
-use App\User;
+use App\Models\User;
 
 class UserPolicy extends Policy
 {
@@ -19,7 +19,7 @@ class UserPolicy extends Policy
     /**
      * Determine if the user is allowed to see the user.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function show(User $user)
@@ -30,7 +30,7 @@ class UserPolicy extends Policy
     /**
      * Determine if the user is allowed to update the user.
      *
-     * @param  \App\User  $user
+     * @param  \App\Models\User  $user
      * @return bool
      */
     public function update(User $user)

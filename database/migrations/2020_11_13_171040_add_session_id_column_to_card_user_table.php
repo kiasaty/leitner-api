@@ -20,9 +20,9 @@ class AddSessionIdColumnToCardUserTable extends Migration
             $table->foreign('session_id')->references('id')->on('sessions')->onDelete('cascade');
         });
 
-        $cards = \App\Card::all();
+        $cards = \App\Models\Card::all();
 
-        $sessions = \App\Session::all();
+        $sessions = \App\Models\Session::all();
         
         foreach (DB::table('card_user')->get() as $item) {
             $card = $cards->find($item->card_id);
