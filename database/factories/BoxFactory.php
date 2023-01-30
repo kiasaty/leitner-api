@@ -24,7 +24,7 @@ class BoxFactory extends Factory
     {
         return [
             'creator_id'    => User::factory(),
-            'title'         => $this->faker->word,
+            'title'         => $this->faker->sentence(3),
             'description'   => $this->faker->sentence,
         ];
     }

@@ -102,6 +102,10 @@ class UserBoxController extends Controller
 
         $this->authorize('update', $box);
 
+        if ($box->hasSessions()) {
+            abort(422, 'The box can not be deleted when there is a session on it.');
+        }
+
         $box->delete();
     }
 

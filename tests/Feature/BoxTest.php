@@ -143,7 +143,9 @@ class BoxTest extends TestCase
         $this->delete("api/users/{$box->creator_id}/boxes/{$box->id}")
             ->assertStatus(422);
 
-        $this->assertDatabaseHas('boxes', $box->makeHidden('creator')->toArray());
+        $this->assertDatabaseHas('boxes', [
+            'id' => $box->getKey(),
+        ]);
     }
 
     /** @test */

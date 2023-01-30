@@ -77,4 +77,9 @@ class Box extends Model
 
         return $this->sessions()->where('user_id', $userID)->firstOrFail();
     }
+
+    public function hasSessions()
+    {
+        return $this->sessions()->exists();
+    }
 }
