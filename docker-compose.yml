@@ -1,0 +1,37 @@
+version: '2'
+
+services:
+
+  leitner:
+    image: docker.io/bitnami/laravel:9
+    container_name: leitner
+    ports:
+      - '8000:8000'
+    volumes:
+      - '.:/app'
+    networks:
+      - leitner
+    depends_on:
+      - mariadb
+
+  mariadb:
+    image: docker.io/bitnami/mariadb:10.6
+    container_name: mariadb
+    environment:
+      MARIADB_DATABASE: ${DB_DATABASE}
+      MARIADB_USER: ${DB_USERNAME}
+      MARIADB_PASSWORD: ${DB_PASSWORD}
+      MARIADB_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-$DB_PASSWORD}
+      TZ: UTC
+    restart: unless-stopped
+    volumes:
+      - 'database:/var/lib/mysql'
+    networks:
+      - leitner
+
+volumes:
+  database:
+
+networks:
+  leitner:
+    driver: bridge
