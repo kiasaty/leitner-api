@@ -6,7 +6,7 @@ services:
     image: docker.io/bitnami/laravel:9
     container_name: leitner
     ports:
-      - '8000:8000'
+      - '80:8000'
     volumes:
       - '.:/app'
     networks:
