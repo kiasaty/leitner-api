@@ -13,7 +13,7 @@ class StartSessionTest extends TestCase
     {
         $box = Box::factory()->hasCards(5)->create();
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(401);
     }
     
@@ -26,7 +26,7 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
         
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(200);
         
         $session->refresh();
@@ -43,7 +43,7 @@ class StartSessionTest extends TestCase
 
         $session = $box->createSession($user);
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(200);
         
         $session->refresh();
@@ -58,7 +58,7 @@ class StartSessionTest extends TestCase
         
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(404);
 
         $this->assertDatabaseMissing('sessions', [
@@ -76,7 +76,7 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(422);
         
         $session->refresh();
@@ -98,7 +98,7 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(422);
         
         $session->refresh();
@@ -124,7 +124,7 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(200);
                          
         $session->refresh();
@@ -146,7 +146,7 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(200);
                          
         $session->refresh();
@@ -175,7 +175,7 @@ class StartSessionTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/start")
+        $this->post("boxes/{$box->id}/session/start")
             ->assertStatus(422);
 
         $session->refresh();

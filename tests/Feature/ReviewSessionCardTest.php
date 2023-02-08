@@ -14,7 +14,7 @@ class ReviewSessionCardTest extends TestCase
     {
         $box = Box::factory()->hasCards(1)->create();
         
-        $this->post("api/boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
             ->assertStatus(401);
     }
     
@@ -23,7 +23,7 @@ class ReviewSessionCardTest extends TestCase
     {
         $this->loginUser();
 
-        $this->post("api/boxes/1000/session/cards/1/review", ['remember' => true])
+        $this->post("boxes/1000/session/cards/1/review", ['remember' => true])
             ->assertStatus(404);
     }
 
@@ -38,7 +38,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser();
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(404);
     }
     
@@ -53,7 +53,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$card->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$card->id}/review", ['remember' => true])
             ->assertStatus(404);
     }
 
@@ -68,7 +68,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
         
-        $this->post("api/boxes/{$box->id}/session/cards/{$anotherBox->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$anotherBox->cards->first()->id}/review", ['remember' => true])
             ->assertStatus(404);
     }
     
@@ -81,7 +81,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
             ->assertStatus(404);
     }
     
@@ -96,14 +96,14 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
             ->assertStatus(422);
 
         $session->start();
 
         $session->complete();
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
             ->assertStatus(422);
     }
     
@@ -127,7 +127,7 @@ class ReviewSessionCardTest extends TestCase
         
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(422);
 
         $previousReviewedAt = $cardToReview->progress->reviewed_at;
@@ -160,7 +160,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$box->cards->first()->id}/review", ['remember' => true])
             ->assertStatus(422);
     }
 
@@ -185,14 +185,14 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(422);
 
         $cardToReview = $session->getNextCard();
         
         $session->demoteCard($cardToReview);
             
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(422);
     }
 
@@ -213,7 +213,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
         
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(200);
         
         $previousLevel = $cardToReview->progress->level;
@@ -242,7 +242,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
         
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(200);
         
         $previousLevel = $cardToReview->progress->level;
@@ -270,7 +270,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => false])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => false])
             ->assertStatus(200);
         
         $cardToReview->progress->refresh();
@@ -297,7 +297,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => false])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => false])
             ->assertStatus(200);
 
         $previousDifficulty = $cardToReview->progress->difficulty;
@@ -324,7 +324,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(200);
 
         $previousDifficulty = $cardToReview->progress->difficulty;
@@ -351,7 +351,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(200);
         
         $cardToReview->progress->refresh();
@@ -380,7 +380,7 @@ class ReviewSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
+        $this->post("boxes/{$box->id}/session/cards/{$cardToReview->id}/review", ['remember' => true])
             ->assertStatus(200);
         
         $previousReviewedAt = $cardToReview->progress->reviewed_at;

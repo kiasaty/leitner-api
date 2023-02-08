@@ -12,7 +12,7 @@ class CreateSessionTest extends TestCase
     {
         $box = Box::factory()->create();
         
-        $this->post("api/boxes/{$box->id}/session/create")
+        $this->post("boxes/{$box->id}/session/create")
             ->assertStatus(401);
     }
     
@@ -23,7 +23,7 @@ class CreateSessionTest extends TestCase
         
         $this->loginUser($box->creator);
 
-        $this->post("api/boxes/{$box->id}/session/create")
+        $this->post("boxes/{$box->id}/session/create")
             ->assertStatus(200);
 
         $this->assertDatabaseHas('sessions', [
@@ -39,7 +39,7 @@ class CreateSessionTest extends TestCase
         
         $user = $this->loginUser();
 
-        $this->post("api/boxes/{$box->id}/session/create")
+        $this->post("boxes/{$box->id}/session/create")
             ->assertStatus(200);
 
         $this->assertDatabaseHas('sessions', [

@@ -13,7 +13,7 @@ class NextSessionCardTest extends TestCase
     {
         $box = Box::factory()->create();
         
-        $this->get("api/boxes/{$box->id}/session/cards/next")
+        $this->get("boxes/{$box->id}/session/cards/next")
             ->assertStatus(401);
     }
 
@@ -28,7 +28,7 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("api/boxes/{$box->id}/session/cards/next")
+        $this->get("boxes/{$box->id}/session/cards/next")
             ->assertStatus(200)
             ->assertJsonFragment(['id' => $card->id]);
     }
@@ -44,7 +44,7 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser();
 
-        $this->get("api/boxes/{$box->id}/session/cards/next")
+        $this->get("boxes/{$box->id}/session/cards/next")
             ->assertStatus(404);
     }
 
@@ -55,7 +55,7 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("api/boxes/{$box->id}/session/cards/next")
+        $this->get("boxes/{$box->id}/session/cards/next")
             ->assertStatus(404);
     }
 
@@ -69,7 +69,7 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("api/boxes/{$box->id}/session/cards/next")
+        $this->get("boxes/{$box->id}/session/cards/next")
             ->assertStatus(422);
     }
 
@@ -85,7 +85,7 @@ class NextSessionCardTest extends TestCase
 
         $this->loginUser($box->creator);
 
-        $this->get("api/boxes/{$box->id}/session/cards/next")
+        $this->get("boxes/{$box->id}/session/cards/next")
             ->assertStatus(422);
     }
 }
